@@ -23,6 +23,8 @@ const statusConfig = {
   shipped: { label: 'Szállítva', icon: Truck, color: 'bg-purple-500/20 text-purple-500' },
   delivered: { label: 'Kézbesítve', icon: CheckCircle, color: 'bg-emerald-500/20 text-emerald-500' },
   cancelled: { label: 'Törölve', icon: XCircle, color: 'bg-red-500/20 text-red-500' },
+  payment_pending: { label: 'Fizetésre vár', icon: Clock, color: 'bg-yellow-500/20 text-yellow-500' },
+  paid: { label: 'Fizetve', icon: CheckCircle, color: 'bg-emerald-500/20 text-emerald-500' },
 };
 
 export default function AdminOrders() {

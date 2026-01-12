@@ -11,19 +11,22 @@ function json(res, status, data) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return json(res, 405, { error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return json(res, 405, { error: "Method not allowed" });
 
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return json(res, 500, { error: "Missing STRIPE_SECRET_KEY env var" });
+    }
+
     const body =
       typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
 
     const { orderId, items, customerEmail, shipping } = body;
 
     if (!orderId) return json(res, 400, { error: "Missing orderId" });
-    if (!Array.isArray(items) || items.length === 0)
+    if (!Array.isArray(items) || items.length === 0) {
       return json(res, 400, { error: "Cart is empty" });
+    }
 
     const line_items = items.map((i) => {
       const quantity = Math.max(1, Number(i.quantity || 1));
@@ -58,17 +61,15 @@ export default async function handler(req, res) {
       });
     }
 
-    const origin =
-      req.headers.origin ||
-      (req.headers.host ? `https://${req.headers.host}` : "http://localhost:5173");
+    const proto = req.headers["x-forwarded-proto"] || "https";
+    const host = req.headers.host;
+    const origin = req.headers.origin || (host ? `${proto}://${host}` : "http://localhost:5173");
 
     const success_url = `${origin}/checkout/success?order_id=${encodeURIComponent(
       orderId
     )}&session_id={CHECKOUT_SESSION_ID}`;
 
-    const cancel_url = `${origin}/checkout?canceled=1&order_id=${encodeURIComponent(
-      orderId
-    )}`;
+    const cancel_url = `${origin}/checkout?canceled=1&order_id=${encodeURIComponent(orderId)}`;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -81,7 +82,7 @@ export default async function handler(req, res) {
 
     return json(res, 200, { id: session.id, url: session.url });
   } catch (e) {
-    console.error("[stripe/create-checkout-session] error:", e);
+    console.error("[api/stripe/create-checkout-session] error:", e);
     return json(res, 500, { error: "Stripe session creation failed" });
   }
 }

@@ -11,14 +11,15 @@ function json(res, status, data) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return json(res, 405, { error: "Method not allowed" });
-  }
+  if (req.method !== "GET") return json(res, 405, { error: "Method not allowed" });
 
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return json(res, 500, { error: "Missing STRIPE_SECRET_KEY env var" });
+    }
+
     const url = new URL(req.url, `http://${req.headers.host}`);
     const session_id = url.searchParams.get("session_id");
-
     if (!session_id) return json(res, 400, { error: "Missing session_id" });
 
     const session = await stripe.checkout.sessions.retrieve(session_id);
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
       metadata: session.metadata || {},
     });
   } catch (e) {
-    console.error("[stripe/verify-session] error:", e);
+    console.error("[api/stripe/verify-session] error:", e);
     return json(res, 500, { error: "Stripe session verify failed" });
   }
 }

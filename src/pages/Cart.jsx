@@ -31,7 +31,6 @@ export default function Cart() {
   };
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = total > 15000 ? 0 : 1490;
 
   return (
     <div className="min-h-screen pt-24 pb-20">
@@ -150,21 +149,20 @@ export default function Cart() {
                   </div>
                   <div className="flex justify-between text-gray-400">
                     <span>Szállítás</span>
-                    <span>{shipping === 0 ? 'Ingyenes' : `${shipping.toLocaleString('hu-HU')} Ft`}</span>
+                    <span className="text-gray-500">A pénztárnál választod ki</span>
                   </div>
+                  <div className="border-t border-white/10 pt-4">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Fizetendő (szállítás nélkül)</span>
+                      <span className="text-[#F7931A]">{total.toLocaleString('hu-HU')} Ft</span>
+                    </div>
+                  </div>
+
                   {total < 15000 && (
                     <p className="text-sm text-[#F7931A]">
                       Még {(15000 - total).toLocaleString('hu-HU')} Ft és ingyenes a szállítás!
                     </p>
                   )}
-                  <div className="border-t border-white/10 pt-4">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Összesen</span>
-                      <span className="text-[#F7931A]">
-                        {(total + shipping).toLocaleString('hu-HU')} Ft
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
                 <Link to={createPageUrl('Checkout')}>

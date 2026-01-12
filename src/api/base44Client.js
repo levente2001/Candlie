@@ -131,6 +131,7 @@ export const base44 = {
     Product: makeEntity('products'),
     Order: makeEntity('orders'),
     PageView: makeEntity('page_views'),
+    ShippingMethod: makeEntity('shipping_methods'), 
   },
   integrations: {
     Core: {

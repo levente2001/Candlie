@@ -14,6 +14,9 @@ import AdminProducts from './pages/AdminProducts.jsx';
 import AdminOrders from './pages/AdminOrders.jsx';
 import AdminShipping from './pages/AdminShipping.jsx';
 
+import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
+
+
 export default function App() {
   return (
     <Routes>
@@ -65,6 +68,15 @@ export default function App() {
           </Layout>
         }
       />
+      <Route
+        path="/checkout/success"
+        element={
+          <Layout currentPageName="CheckoutSuccess">
+            <CheckoutSuccess />
+          </Layout>
+        }
+      />
+
 
       {/* Admin */}
       <Route

@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProducts from './pages/AdminProducts.jsx';
 import AdminOrders from './pages/AdminOrders.jsx';
+import AdminShipping from './pages/AdminShipping.jsx';
 
 export default function App() {
   return (
@@ -87,6 +88,14 @@ export default function App() {
         element={
           <Layout currentPageName="AdminOrders">
             <AdminOrders />
+          </Layout>
+        }
+      />
+      <Route
+        path="/admin/shipping"
+        element={
+          <Layout currentPageName="AdminShipping">
+            <AdminShipping />
           </Layout>
         }
       />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AdminSidebar({ collapsed, setCollapsed }) {
@@ -11,6 +11,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { icon: LayoutDashboard, label: 'Dashboard', page: 'AdminDashboard' },
     { icon: Package, label: 'Termékek', page: 'AdminProducts' },
     { icon: ShoppingBag, label: 'Rendelések', page: 'AdminOrders' },
+    { icon: Truck, label: 'Kiszállítás', page: 'AdminShipping' },
   ];
 
   const isActive = (page) => location.pathname.includes(page.toLowerCase().replace('admin', ''));

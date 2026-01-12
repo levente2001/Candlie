@@ -9,6 +9,7 @@ const pageMap = {
   AdminDashboard: '/admin',
   AdminProducts: '/admin/products',
   AdminOrders: '/admin/orders',
+  AdminShipping: '/admin/shipping',
 };
 
 export function createPageUrl(page) {

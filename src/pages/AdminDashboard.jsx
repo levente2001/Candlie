@@ -5,7 +5,7 @@ import AdminSidebar from '../components/admin/AdminSidebar';
 import StatsCard from '../components/admin/StatsCard';
 import { motion } from 'framer-motion';
 import { DollarSign, ShoppingBag, Package, Users, TrendingUp, ArrowUpRight, ArrowDownRight, Eye, MousePointerClick } from 'lucide-react';
-import { format, subDays, startOfMonth, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { format, subDays, startOfMonth, parseISO, startOfDay, endOfDay, differenceInCalendarDays } from 'date-fns';
 import { hu } from 'date-fns/locale';
 import {
   AreaChart,
@@ -75,7 +75,68 @@ export default function AdminDashboard() {
   const uniqueSessions = new Set(filteredPageViews.map((pv) => pv.session_id).filter(Boolean)).size;
 
   // Conversion: fizetett rendelések / sessionök
-  const conversionRate = uniqueSessions > 0 ? ((paidOrders.length / uniqueSessions) * 100).toFixed(1) : 0;
+  const conversionRateNum = uniqueSessions > 0 ? (paidOrders.length / uniqueSessions) * 100 : 0;
+  const conversionRate = conversionRateNum.toFixed(1);
+
+  // ---- Previous period (same length) + trends ----
+  const hasRange = Boolean(fromDate && toDate);
+
+  const currentStart = hasRange ? startOfDay(parseISO(fromDate)) : null;
+  const currentEnd = hasRange ? endOfDay(parseISO(toDate)) : null;
+
+  // inclusive napok száma (pl. 21-től 31-ig = 11 nap)
+  const rangeDays = hasRange ? differenceInCalendarDays(currentEnd, currentStart) + 1 : null;
+
+  const prevStart = hasRange ? startOfDay(subDays(currentStart, rangeDays)) : null;
+  const prevEnd = hasRange ? endOfDay(subDays(currentStart, 1)) : null;
+
+  const inWindow = (dateVal, start, end) => {
+    if (!dateVal || !start || !end) return false;
+    const d = new Date(dateVal);
+    if (Number.isNaN(d.getTime())) return false;
+    return d >= start && d <= end;
+  };
+
+  // Previous period datasets
+  const prevOrders = hasRange ? orders.filter(o => inWindow(o.created_date, prevStart, prevEnd)) : [];
+  const prevPaidOrders = prevOrders.filter(o => o.status === 'paid');
+
+  const prevPageViews = hasRange ? pageViews.filter(pv => inWindow(pv.created_date, prevStart, prevEnd)) : [];
+  const prevUniqueSessions = new Set(prevPageViews.map(pv => pv.session_id).filter(Boolean)).size;
+
+  // Previous period metrics
+  const prevRevenue = prevPaidOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+  const prevOrdersCount = prevOrders.length;
+  const prevViews = prevPageViews.length;
+  const prevConversionNum = prevUniqueSessions > 0 ? (prevPaidOrders.length / prevUniqueSessions) * 100 : 0;
+
+  // Trend helpers
+  const trendPct = (curr, prev, decimals = 1) => {
+    if (!hasRange) return { trend: 'up', text: '—' };
+
+    const c = Number(curr || 0);
+    const p = Number(prev || 0);
+
+    if (p === 0) {
+      if (c === 0) return { trend: 'up', text: '0.0%' };
+      return { trend: 'up', text: 'Új' };
+    }
+
+    const pct = ((c - p) / p) * 100;
+    const sign = pct >= 0 ? '+' : '';
+    return {
+      trend: pct >= 0 ? 'up' : 'down',
+      text: `${sign}${pct.toFixed(decimals)}%`,
+    };
+  };
+
+  // Build trends for the 4 cards
+  const revenueTrend = trendPct(totalRevenue, prevRevenue);
+  const ordersTrend = trendPct(filteredOrders.length, prevOrdersCount);
+  const viewsTrend = trendPct(totalPageViews, prevViews);
+  const conversionTrend = trendPct(conversionRateNum, prevConversionNum);
+
+
 
   // Chart data - Last 7 days (PAID only for revenue)
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -211,16 +272,16 @@ export default function AdminDashboard() {
               title="Összes bevétel"
               value={`${totalRevenue.toLocaleString('hu-HU')} Ft`}
               icon={DollarSign}
-              trend="up"
-              trendValue="+12.5%"
+              trend={revenueTrend.trend}
+              trendValue={revenueTrend.text}
               index={0}
             />
             <StatsCard
               title="Rendelések"
               value={filteredOrders.length}
               icon={ShoppingBag}
-              trend="up"
-              trendValue="+8.2%"
+              trend={ordersTrend.trend}
+              trendValue={ordersTrend.text}
               color="#627EEA"
               index={1}
             />
@@ -228,8 +289,8 @@ export default function AdminDashboard() {
               title="Oldalmegtekintések"
               value={totalPageViews}
               icon={Eye}
-              trend="up"
-              trendValue={`${todayViews} ma`}
+              trend={viewsTrend.trend}
+              trendValue={viewsTrend.text}
               color="#26A17B"
               index={2}
             />
@@ -237,12 +298,13 @@ export default function AdminDashboard() {
               title="Konverziós ráta"
               value={`${conversionRate}%`}
               icon={MousePointerClick}
-              trend="up"
-              trendValue="+2.3%"
+              trend={conversionTrend.trend}
+              trendValue={conversionTrend.text}
               color="#8247E5"
               index={3}
             />
           </div>
+
 
           {/* Detailed Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">

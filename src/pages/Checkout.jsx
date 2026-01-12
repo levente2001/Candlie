@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Loader2, CreditCard, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Loader2, CreditCard, AlertTriangle, Banknote } from 'lucide-react';
 
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '../utils';
@@ -27,6 +27,13 @@ export default function Checkout() {
   const [cart, setCart] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // 'stripe' | 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
+
+  // COD success UX
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -78,12 +85,16 @@ export default function Checkout() {
     setIsSubmitting(true);
 
     try {
+      const isCOD = paymentMethod === 'cod';
+
       const orderData = {
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
         shipping_address: formData.address,
         notes: formData.notes,
+
+        payment_method: isCOD ? 'cod' : 'stripe',
 
         items: cart.map((item) => ({
           product_id: item.id,
@@ -115,11 +126,25 @@ export default function Checkout() {
             },
 
         total_amount: total,
-        status: 'payment_pending',
+
+        // Stripe: payment_pending
+        // COD: pending
+        status: isCOD ? 'pending' : 'payment_pending',
       };
 
       const created = await base44.entities.Order.create(orderData);
 
+      // COD flow: no Stripe redirect
+      if (isCOD) {
+        localStorage.removeItem('cryptoCart');
+        setCart([]);
+        setPlacedOrderId(created.id);
+        setOrderPlaced(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Stripe flow
       const r = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,8 +162,12 @@ export default function Checkout() {
         }),
       });
 
-      const j = await r.json();
-      if (!r.ok) throw new Error(j?.error || 'Nem sikerült Stripe session-t létrehozni.');
+      // safer parse (no more "Unexpected end of JSON input")
+      const text = await r.text();
+      let j = {};
+      try { j = text ? JSON.parse(text) : {}; } catch { j = {}; }
+
+      if (!r.ok) throw new Error(j?.error || `Stripe API error (${r.status}): ${text.slice(0, 200)}`);
       if (!j?.url) throw new Error('Stripe URL hiányzik a válaszból.');
 
       window.location.assign(j.url);
@@ -149,6 +178,31 @@ export default function Checkout() {
   };
 
   if (cart.length === 0) {
+    // COD success után is ide jutunk (cart cleared) — ilyenkor mutassunk visszajelzést
+    if (orderPlaced) {
+      return (
+        <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+          <div className="max-w-xl w-full bg-[#1a1a1a] rounded-2xl p-8 border border-white/5 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 mb-4">
+              <Banknote className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Rendelés rögzítve (utánvét)</h2>
+            <p className="text-gray-400 mb-6">
+              Köszönjük! A rendelésed státusza <span className="text-gray-200 font-semibold">pending</span>.
+              <br />
+              Rendelés azonosító: <span className="text-gray-200 font-semibold">{placedOrderId}</span>
+            </p>
+            <Link
+              to={createPageUrl('Products')}
+              className="inline-flex items-center justify-center h-12 px-5 rounded-xl bg-gradient-to-r from-[#F7931A] to-[#f5a623] text-black font-semibold"
+            >
+              Vissza a termékekhez
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
         <div className="text-center">
@@ -164,7 +218,10 @@ export default function Checkout() {
   return (
     <div className="min-h-screen pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link to={createPageUrl('Cart')} className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+        <Link
+          to={createPageUrl('Cart')}
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+        >
           <ArrowLeft className="w-5 h-5" />
           Vissza a kosárhoz
         </Link>
@@ -179,12 +236,21 @@ export default function Checkout() {
           </div>
         )}
 
-        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-bold mb-8">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl md:text-4xl font-bold mb-8"
+        >
           Pénztár
         </motion.h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onSubmit={handleSubmit}
+            className="lg:col-span-2 space-y-6"
+          >
             {error && (
               <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-200 flex gap-3">
                 <AlertTriangle className="w-5 h-5 mt-0.5" />
@@ -200,7 +266,10 @@ export default function Checkout() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name" className="text-gray-300">Teljes név *</Label>
-                  <Input id="name" required value={formData.name}
+                  <Input
+                    id="name"
+                    required
+                    value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
                     placeholder="Kovács János"
@@ -208,7 +277,11 @@ export default function Checkout() {
                 </div>
                 <div>
                   <Label htmlFor="email" className="text-gray-300">E-mail cím *</Label>
-                  <Input id="email" type="email" required value={formData.email}
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
                     placeholder="email@example.com"
@@ -216,7 +289,10 @@ export default function Checkout() {
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="phone" className="text-gray-300">Telefonszám *</Label>
-                  <Input id="phone" required value={formData.phone}
+                  <Input
+                    id="phone"
+                    required
+                    value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
                     placeholder="+36 30 123 4567"
@@ -259,7 +335,7 @@ export default function Checkout() {
                   {selectedShipping?.eta && <p className="text-xs text-gray-500 mt-1">ETA: {selectedShipping.eta}</p>}
                   {selectedShipping?.free_over != null && subtotal < selectedShipping.free_over && (
                     <p className="text-sm text-[#F7931A] mt-2">
-                      Még {(selectedShipping.free_over - subtotal).toLocaleString('hu-HU')} Ft és ingyenes lesz a szállítás ennél a módnál.
+                      Még {(selectedShipping.free_over - subtotal).toLocaleString('hu-HU')} Ft és ingyenes lesz a szállítás
                     </p>
                   )}
                 </div>
@@ -267,7 +343,10 @@ export default function Checkout() {
 
               <div className="mt-6">
                 <Label htmlFor="address" className="text-gray-300">Szállítási cím *</Label>
-                <Textarea id="address" required value={formData.address}
+                <Textarea
+                  id="address"
+                  required
+                  value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="mt-2 bg-[#252525] border-white/10 rounded-xl"
                   placeholder="1234 Budapest, Példa utca 12."
@@ -277,7 +356,9 @@ export default function Checkout() {
 
               <div className="mt-4">
                 <Label htmlFor="notes" className="text-gray-300">Megjegyzés (opcionális)</Label>
-                <Textarea id="notes" value={formData.notes}
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="mt-2 bg-[#252525] border-white/10 rounded-xl"
                   placeholder="Pl.: csengőnél hívjon"
@@ -286,28 +367,94 @@ export default function Checkout() {
               </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting}
+            {/* Fizetési mód */}
+            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5">
+              <h2 className="text-xl font-bold mb-4">Fizetési mód</h2>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('stripe')}
+                  className={`text-left rounded-2xl p-4 border transition-all ${
+                    paymentMethod === 'stripe'
+                      ? 'border-[#F7931A]/60 bg-[#252525]'
+                      : 'border-white/10 bg-[#141414] hover:bg-[#1f1f1f]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      paymentMethod === 'stripe' ? 'bg-[#F7931A]/15 text-[#F7931A]' : 'bg-white/5 text-gray-300'
+                    }`}>
+                      <CreditCard className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Bankkártya (Stripe)</div>
+                      <div className="text-xs text-gray-400">Biztonságos online fizetés</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('cod')}
+                  className={`text-left rounded-2xl p-4 border transition-all ${
+                    paymentMethod === 'cod'
+                      ? 'border-[#F7931A]/60 bg-[#252525]'
+                      : 'border-white/10 bg-[#141414] hover:bg-[#1f1f1f]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      paymentMethod === 'cod' ? 'bg-[#F7931A]/15 text-[#F7931A]' : 'bg-white/5 text-gray-300'
+                    }`}>
+                      <Banknote className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Utánvét</div>
+                      <div className="text-xs text-gray-400">Fizetés átvételkor</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 mt-3">
+                {paymentMethod === 'stripe'
+                  ? 'A gombra kattintva átirányítunk a Stripe biztonságos fizetési oldalára.'
+                  : 'A rendelésed rögzítjük, a fizetés átvételkor történik. A rendelés státusza: pending.'}
+              </p>
+            </div>
+
+            {/* CTA */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
               className="w-full h-14 bg-gradient-to-r from-[#F7931A] to-[#f5a623] text-black font-semibold text-lg rounded-xl hover:shadow-lg hover:shadow-[#F7931A]/25 transition-all"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Átirányítás a fizetéshez...
+                  {paymentMethod === 'stripe' ? 'Átirányítás a fizetéshez...' : 'Rendelés rögzítése...'}
                 </>
-              ) : (
+              ) : paymentMethod === 'stripe' ? (
                 <>
                   <CreditCard className="w-5 h-5 mr-2" />
                   Fizetés Stripe-pal
                 </>
+              ) : (
+                <>
+                  <Banknote className="w-5 h-5 mr-2" />
+                  Megrendelem
+                </>
               )}
             </Button>
-
-            <p className="text-xs text-gray-500 text-center">
-              A gombra kattintva átirányítunk a Stripe biztonságos fizetési oldalára.
-            </p>
           </motion.form>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-1">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-1"
+          >
             <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 sticky top-28">
               <h2 className="text-xl font-bold mb-6">Összesítés</h2>
 
@@ -331,7 +478,7 @@ export default function Checkout() {
               </div>
 
               <div className="text-xs text-gray-500">
-                * Az árak forintban értendők, tartalmazzák a <span className="text-gray-300">27%-os</span>  áfát.
+                * Az árak forintban értendők, tartalmazzák a <span className="text-gray-300">27%-os</span> áfát.
               </div>
             </div>
           </motion.div>

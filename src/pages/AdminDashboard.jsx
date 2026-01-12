@@ -62,7 +62,7 @@ export default function AdminDashboard() {
   const filteredPageViews = pageViews.filter((pv) => inRange(pv.created_date));
 
   // --- Revenue ONLY from paid orders ---
-  const paidOrders = filteredOrders.filter((o) => o.status === 'paid');
+  const paidOrders = filteredOrders.filter((o) => o.status === 'paid' || 'delivered');
 
   const totalRevenue = paidOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
   const averageOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;

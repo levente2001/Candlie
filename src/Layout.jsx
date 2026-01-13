@@ -176,7 +176,7 @@ export default function Layout({ children, currentPageName }) {
                   <Bitcoin className="w-6 h-6 text-black" />
                 </div>
                 <span className="text-2xl font-bold">
-                  Crypto<span className="text-[#F7931A]">Tees</span>
+                  Crypto<span className="text-[#F7931A]">Club</span>
                 </span>
               </div>
               <p className="text-gray-400 max-w-md">

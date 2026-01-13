@@ -8,6 +8,7 @@ import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import EditableText from '@/components/editable/EditableText';
 
 const categories = [
   { id: 'all', name: 'Összes' },
@@ -56,14 +57,18 @@ export default function Products() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Crypto{' '}
+            <EditableText as="span" contentKey="products.hero.title_1" defaultValue="Crypto" />{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F7931A] to-[#f5a623]">
-              Kollekció
+              <EditableText as="span" contentKey="products.hero.title_2" defaultValue="Kollekció" />
             </span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Válassz a legjobb crypto témájú pólóink közül és mutasd meg a világnak, hogy te is a közösséghez tartozol!
-          </p>
+
+          <EditableText
+            as="p"
+            contentKey="products.hero.subtitle"
+            defaultValue="Válassz a legjobb crypto témájú pólóink közül és mutasd meg a világnak, hogy te is a közösséghez tartozol!"
+            className="text-gray-400 text-lg max-w-2xl mx-auto"
+          />
         </motion.div>
 
         {/* Filters Bar */}

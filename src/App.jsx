@@ -15,6 +15,7 @@ import AdminOrders from './pages/AdminOrders.jsx';
 import AdminShipping from './pages/AdminShipping.jsx';
 
 import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
+import AdminContentEditor from './pages/AdminContentEditor.jsx';
 
 
 export default function App() {
@@ -76,6 +77,7 @@ export default function App() {
           </Layout>
         }
       />
+      
 
 
       {/* Admin */}
@@ -111,6 +113,15 @@ export default function App() {
           </Layout>
         }
       />
+      <Route
+        path="/admin/content"
+        element={
+          <Layout currentPageName="AdminContentEditor">
+            <AdminContentEditor />
+          </Layout>
+        }
+      />
+
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

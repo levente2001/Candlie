@@ -11,6 +11,7 @@ const pageMap = {
   AdminOrders: '/admin/orders',
   AdminShipping: '/admin/shipping',
   CheckoutSuccess: '/checkout/success',
+  AdminContentEditor: '/admin/content',
 };
 
 export function createPageUrl(page) {

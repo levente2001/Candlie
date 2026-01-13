@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Award, Zap, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
+import EditableText from '../editable/EditableText';
 
 export default function FeaturesSection() {
   const features = [
@@ -10,6 +11,7 @@ export default function FeaturesSection() {
       description: 'Merülj el a különleges mintáink között és találd meg azt, ami igazán neked való. Valamint, ha van egy jó ötleted, küldd el nekünk, ki tudja, talán már a következő kollekcióban benne lehet…',
       emoji: '🎨',
       color: 'from-purple-500 to-pink-500',
+      contentKeyBase: 'featuresSection.items.uniquePatterns',
     },
     {
       icon: Award,
@@ -17,6 +19,7 @@ export default function FeaturesSection() {
       description: 'Mint a legjobb stake: csak a kiváltságosoknak jár. A limitált Crypto Club kollekciók gyorsabban fogynak, mint a BTC egy dump után!',
       emoji: '🏆',
       color: 'from-[#F7931A] to-yellow-500',
+      contentKeyBase: 'featuresSection.items.proofOfStyle',
     },
     {
       icon: Zap,
@@ -24,6 +27,7 @@ export default function FeaturesSection() {
       description: 'Nem hagyunk poros trendeket a portfóliódban! Folyamatosan érkező új mintáinkkal segítünk trendi maradni.',
       emoji: '⚡',
       color: 'from-blue-500 to-cyan-500',
+      contentKeyBase: 'featuresSection.items.freshDrops',
     },
     {
       icon: Wallet,
@@ -31,6 +35,7 @@ export default function FeaturesSection() {
       description: 'Kedvező árainknak köszönhetően még akkor is benne van 1-2 új póló beszerzése, ha a piac éppen nem alakul fényesen. Ha a piac épp padlón van, legalább a stílusod legyen csúcson.',
       emoji: '💰',
       color: 'from-emerald-500 to-green-500',
+      contentKeyBase: 'featuresSection.items.forEveryWallet',
     },
   ];
 
@@ -46,9 +51,17 @@ export default function FeaturesSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Mindenki blokkláncra kerülhet...{' '}
+            <EditableText
+              as="span"
+              contentKey="featuresSection.heading"
+              defaultValue="Mindenki blokkláncra kerülhet..."
+            />{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F7931A] to-[#f5a623]">
-              stílusosan
+              <EditableText
+                as="span"
+                contentKey="featuresSection.headingEmphasis"
+                defaultValue="stílusosan"
+              />
             </span>
           </h2>
         </motion.div>
@@ -70,24 +83,32 @@ export default function FeaturesSection() {
                 
                 {/* Icon Container with Emoji */}
                 <div className="relative flex items-center gap-3 mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F7931A]/20 to-[#F7931A]/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-7 h-7 text-[#F7931A]" />
-                  </div>
+                  
                   <motion.span 
                     className="text-4xl"
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                   >
-                    {feature.emoji}
+                    <EditableText
+                      as="span"
+                      contentKey={`${feature.contentKeyBase}.emoji`}
+                      defaultValue={feature.emoji}
+                    />
                   </motion.span>
                 </div>
                 
-                <h3 className="text-xl font-bold mb-3 group-hover:text-[#F7931A] transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-400 leading-relaxed text-sm">
-                  {feature.description}
-                </p>
+                <EditableText
+                  as="h3"
+                  className="text-xl font-bold mb-3 group-hover:text-[#F7931A] transition-colors"
+                  contentKey={`${feature.contentKeyBase}.title`}
+                  defaultValue={feature.title}
+                />
+                <EditableText
+                  as="p"
+                  className="text-gray-400 leading-relaxed text-sm"
+                  contentKey={`${feature.contentKeyBase}.description`}
+                  defaultValue={feature.description}
+                />
                 
                 {/* Decorative Element */}
                 <div className={`absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br ${feature.color} opacity-10 rounded-full blur-2xl`} />

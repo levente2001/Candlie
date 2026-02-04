@@ -278,7 +278,7 @@ export default function AdminProducts() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="mt-2"
-                  placeholder="Bitcoin HODL Póló"
+                  placeholder="Termék neve..."
                 />
               </div>
               <div>

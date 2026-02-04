@@ -7,8 +7,21 @@ html, body {
   height: 100%;
 }
 
+:root {
+  --candlie-pink-primary: #986299;
+  --candlie-pink-secondary: #735573;
+  --candlie-bg: #f6f6f6;
+  --candlie-text: #000000;
+}
+
+body {
+  font-family: "Times New Roman", Times, serif;
+  background: var(--candlie-bg);
+  color: var(--candlie-text);
+}
+
 /* Better focus outlines */
 :focus-visible {
-  outline: 2px solid rgba(247, 147, 26, 0.6);
+  outline: 2px solid rgba(152, 98, 153, 0.6);
   outline-offset: 2px;
 }

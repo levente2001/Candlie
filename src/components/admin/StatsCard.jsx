@@ -2,21 +2,21 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
-export default function StatsCard({ title, value, icon: Icon, trend, trendValue, color = '#F7931A', index = 0 }) {
+export default function StatsCard({ title, value, icon: Icon, trend, trendValue, color = 'var(--candlie-pink-primary)', index = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-all"
+      className="bg-white rounded-2xl p-6 border border-black/10 hover:border-black/20 transition-all"
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-gray-400 text-sm mb-1">{title}</p>
-          <h3 className="text-3xl font-bold">{value}</h3>
+          <p className="text-black/60 text-sm mb-1">{title}</p>
+          <h3 className="text-3xl font-semibold text-black">{value}</h3>
           {trendValue && (
             <div className={`flex items-center gap-1 mt-2 text-sm ${
-              trend === 'up' ? 'text-emerald-500' : 'text-red-500'
+              trend === 'up' ? 'text-emerald-600' : 'text-red-600'
             }`}>
               {trend === 'up' ? (
                 <TrendingUp className="w-4 h-4" />

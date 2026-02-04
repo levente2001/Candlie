@@ -46,8 +46,8 @@ export default function CheckoutSuccess() {
 
   if (state.loading) {
     return (
-      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-300">
+      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-[var(--candlie-bg)]">
+        <div className="flex items-center gap-3 text-black/60">
           <Loader2 className="w-6 h-6 animate-spin" />
           Fizetés ellenőrzése...
         </div>
@@ -57,14 +57,14 @@ export default function CheckoutSuccess() {
 
   if (!state.ok) {
     return (
-      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-[var(--candlie-bg)]">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6">
-            <XCircle className="w-10 h-10 text-red-400" />
+            <XCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold mb-3">Valami nem oké a fizetéssel</h1>
-          <p className="text-gray-400 mb-6">{state.error}</p>
-          <Link to={createPageUrl("Checkout")} className="text-[#F7931A] hover:underline">
+          <h1 className="text-2xl font-semibold mb-3">Valami nem oké a fizetéssel</h1>
+          <p className="text-black/60 mb-6">{state.error}</p>
+          <Link to={createPageUrl("Checkout")} className="text-[var(--candlie-pink-primary)] hover:underline">
             Vissza a checkouthoz
           </Link>
         </div>
@@ -73,22 +73,22 @@ export default function CheckoutSuccess() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+    <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-[var(--candlie-bg)]">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="text-center max-w-md mx-auto px-4"
       >
         <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-          <Check className="w-10 h-10 text-emerald-500" />
+          <Check className="w-10 h-10 text-emerald-600" />
         </div>
-        <h1 className="text-3xl font-bold mb-4">Sikeres fizetés!</h1>
-        <p className="text-gray-400 mb-8">
+        <h1 className="text-3xl font-semibold mb-4">Sikeres fizetés!</h1>
+        <p className="text-black/60 mb-8">
           Köszönjük! A rendelésed rögzítve lett, hamarosan feldolgozzuk.
         </p>
         <Link
           to={createPageUrl("Home")}
-          className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#F7931A] to-[#f5a623] text-black font-semibold rounded-xl hover:shadow-lg hover:shadow-[#F7931A]/25 transition-all"
+          className="inline-flex items-center gap-2 px-8 py-4 bg-[var(--candlie-pink-secondary)] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[var(--candlie-pink-primary)]/25 transition-all"
         >
           Vissza a főoldalra
         </Link>

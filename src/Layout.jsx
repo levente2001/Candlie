@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import { ShoppingCart, Menu, X, Bitcoin } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Layout({ children, currentPageName }) {
@@ -40,29 +40,30 @@ export default function Layout({ children, currentPageName }) {
   const navLinks = [
     { name: 'Főoldal', page: 'Home' },
     { name: 'Termékek', page: 'Products' },
-    { name: 'Rólunk', page: 'About' },
+    { name: 'Candlie', page: 'Candlie' },
+    { name: 'Kapcsolat', page: 'Contact' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--candlie-bg)] text-black">
       <style>{`
         :root {
-          --crypto-gold: #F7931A;
-          --crypto-dark: #0a0a0a;
-          --crypto-gray: #1a1a1a;
+          --crypto-gold: var(--candlie-pink-primary);
+          --crypto-dark: #f6f6f6;
+          --crypto-gray: #ffffff;
         }
         * {
           scrollbar-width: thin;
-          scrollbar-color: #F7931A #1a1a1a;
+          scrollbar-color: var(--candlie-pink-primary) #f6f6f6;
         }
         *::-webkit-scrollbar {
           width: 8px;
         }
         *::-webkit-scrollbar-track {
-          background: #1a1a1a;
+          background: #f6f6f6;
         }
         *::-webkit-scrollbar-thumb {
-          background: #F7931A;
+          background: var(--candlie-pink-primary);
           border-radius: 4px;
         }
       `}</style>
@@ -72,36 +73,33 @@ export default function Layout({ children, currentPageName }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-xl shadow-2xl' : 'bg-transparent'
+          isScrolled ? 'bg-white/95 backdrop-blur-xl shadow-sm' : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to={createPageUrl('Home')} className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F7931A] to-[#f5a623] flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                <Bitcoin className="w-6 h-6 text-black" />
-              </div>
-              <span className="text-2xl font-bold">
-                Crypto<span className="text-[#F7931A]">Club</span>
+              <span className="text-3xl font-semibold tracking-[0.35em] text-black">
+                CANDLIE
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex flex-1 items-center justify-center gap-10">
               {navLinks.map((link) => (
                 <Link
                   key={link.page}
                   to={createPageUrl(link.page)}
-                  className={`relative text-sm font-medium tracking-wide transition-colors hover:text-[#F7931A] ${
-                    currentPageName === link.page ? 'text-[#F7931A]' : 'text-gray-300'
+                  className={`relative text-sm font-semibold tracking-wide transition-colors hover:text-[var(--candlie-pink-primary)] ${
+                    currentPageName === link.page ? 'text-[var(--candlie-pink-primary)]' : 'text-black/70'
                   }`}
                 >
                   {link.name}
                   {currentPageName === link.page && (
                     <motion.div
                       layoutId="navbar-indicator"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#F7931A]"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[var(--candlie-pink-primary)]"
                     />
                   )}
                 </Link>
@@ -112,14 +110,14 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center gap-4">
               <Link
                 to={createPageUrl('Cart')}
-                className="relative p-3 rounded-xl bg-[#1a1a1a] hover:bg-[#252525] transition-colors group"
+                className="relative p-3 rounded-xl bg-white hover:bg-black/5 transition-colors group border border-black/5"
               >
-                <ShoppingCart className="w-5 h-5 group-hover:text-[#F7931A] transition-colors" />
+                <ShoppingCart className="w-5 h-5 group-hover:text-[var(--candlie-pink-primary)] transition-colors" />
                 {cartCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-[#F7931A] text-black text-xs font-bold rounded-full flex items-center justify-center"
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--candlie-pink-primary)] text-white text-xs font-bold rounded-full flex items-center justify-center"
                   >
                     {cartCount}
                   </motion.span>
@@ -127,7 +125,7 @@ export default function Layout({ children, currentPageName }) {
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-3 rounded-xl bg-[#1a1a1a] hover:bg-[#252525] transition-colors"
+                className="md:hidden p-3 rounded-xl bg-white hover:bg-black/5 transition-colors border border-black/5"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -142,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-[#0a0a0a]/98 backdrop-blur-xl border-t border-white/10"
+              className="md:hidden bg-white/98 backdrop-blur-xl border-t border-black/10"
             >
               <div className="px-4 py-6 space-y-4">
                 {navLinks.map((link) => (
@@ -151,7 +149,7 @@ export default function Layout({ children, currentPageName }) {
                     to={createPageUrl(link.page)}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`block py-3 text-lg font-medium ${
-                      currentPageName === link.page ? 'text-[#F7931A]' : 'text-gray-300'
+                      currentPageName === link.page ? 'text-[var(--candlie-pink-primary)]' : 'text-black/70'
                     }`}
                   >
                     {link.name}
@@ -167,31 +165,27 @@ export default function Layout({ children, currentPageName }) {
       <main>{children}</main>
 
       {/* Footer */}
-      <footer className="bg-[#0a0a0a] border-t border-white/5 mt-20">
+      <footer className="bg-white border-t border-black/10 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F7931A] to-[#f5a623] flex items-center justify-center">
-                  <Bitcoin className="w-6 h-6 text-black" />
-                </div>
-                <span className="text-2xl font-bold">
-                  Crypto<span className="text-[#F7931A]">Club</span>
+                <span className="text-2xl font-semibold tracking-[0.3em] text-black">
+                  CANDLIE
                 </span>
               </div>
-              <p className="text-gray-400 max-w-md">
-                Mi is befektetünk, de nem csak coinokba, hanem stílusba is. 
-                Nálunk a póló nem csak egy ruha, hanem egy életérzés.
+              <p className="text-black/70 max-w-md">
+                A kedvenc italod, gyertya formában!
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Navigáció</h4>
+              <h4 className="text-sm font-semibold text-black mb-4">Navigáció</h4>
               <ul className="space-y-2">
                 {navLinks.map((link) => (
                   <li key={link.page}>
                     <Link
                       to={createPageUrl(link.page)}
-                      className="text-gray-400 hover:text-[#F7931A] transition-colors text-sm"
+                      className="text-black/60 hover:text-[var(--candlie-pink-primary)] transition-colors text-sm"
                     >
                       {link.name}
                     </Link>
@@ -200,16 +194,15 @@ export default function Layout({ children, currentPageName }) {
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Információk</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>Gyors szállítás</li>
-                <li>Biztonságos fizetés</li>
-                <li>Könnyű visszaküldés</li>
+              <h4 className="text-sm font-semibold text-black mb-4">Információk</h4>
+              <ul className="space-y-2 text-sm text-black/60">
+                <li>ÁSZF</li>
+                <li>Adatkezelési tájékoztató</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-white/5 mt-12 pt-8 text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} CryptoClub. Minden jog fenntartva.
+          <div className="border-t border-black/10 mt-12 pt-8 text-center text-black/50 text-sm">
+            © {new Date().getFullYear()} CANDLIE. Minden jog fenntartva.
           </div>
         </div>
       </footer>

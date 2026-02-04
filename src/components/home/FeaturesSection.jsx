@@ -1,47 +1,38 @@
 import React from 'react';
-import { Sparkles, Award, Zap, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EditableText from '../editable/EditableText';
 
 export default function FeaturesSection() {
   const features = [
     {
-      icon: Sparkles,
-      title: 'Egyedi minták',
-      description: 'Merülj el a különleges mintáink között és találd meg azt, ami igazán neked való. Valamint, ha van egy jó ötleted, küldd el nekünk, ki tudja, talán már a következő kollekcióban benne lehet…',
-      emoji: '🎨',
-      color: 'from-purple-500 to-pink-500',
-      contentKeyBase: 'featuresSection.items.uniquePatterns',
+      title: 'Szeretettel öntve',
+      description:
+        'Minden termékünk kézzel készül, egyedi illatvilággal, maximális odafigyeléssel kiöntve.',
+      contentKeyBase: 'featuresSection.items.handmade',
     },
     {
-      icon: Award,
-      title: 'Proof of Style',
-      description: 'Mint a legjobb stake: csak a kiváltságosoknak jár. A limitált Crypto Club kollekciók gyorsabban fogynak, mint a BTC egy dump után!',
-      emoji: '🏆',
-      color: 'from-[#F7931A] to-yellow-500',
-      contentKeyBase: 'featuresSection.items.proofOfStyle',
+      title: 'Prémium minőség',
+      description:
+        'Kizárólag minőségi, 100% szója­viaszt használunk, amely káros anyagoktól mentes és hosszabb, tisztább égést biztosít.',
+      contentKeyBase: 'featuresSection.items.premium',
     },
     {
-      icon: Zap,
-      title: 'Friss dropok',
-      description: 'Nem hagyunk poros trendeket a portfóliódban! Folyamatosan érkező új mintáinkkal segítünk trendi maradni.',
-      emoji: '⚡',
-      color: 'from-blue-500 to-cyan-500',
-      contentKeyBase: 'featuresSection.items.freshDrops',
+      title: 'Újrahasznosítható pohár',
+      description:
+        'Ha elégetted illatgyertyád, hasznosítsd újra a poharat, hogy kedvenc koktélod ne csak gyertya, de ital formában is megcsodálhasd.',
+      contentKeyBase: 'featuresSection.items.reusable',
     },
     {
-      icon: Wallet,
-      title: 'Stílus minden pénztárcához',
-      description: 'Kedvező árainknak köszönhetően még akkor is benne van 1-2 új póló beszerzése, ha a piac éppen nem alakul fényesen. Ha a piac épp padlón van, legalább a stílusod legyen csúcson.',
-      emoji: '💰',
-      color: 'from-emerald-500 to-green-500',
-      contentKeyBase: 'featuresSection.items.forEveryWallet',
+      title: 'Vásárló barát',
+      description:
+        'A kedvező árak, részletes tájékoztatás és gyors szállítás mellett mindig rendelkezésre állunk kérdés esetén.',
+      contentKeyBase: 'featuresSection.items.friendly',
     },
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a]" />
+    <section className="py-24 relative overflow-hidden bg-[var(--candlie-bg)]">
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f6f1f6] to-[#f6f6f6]" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -50,19 +41,24 @@ export default function FeaturesSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-semibold mb-4 text-black">
             <EditableText
               as="span"
               contentKey="featuresSection.heading"
-              defaultValue="Mindenki blokkláncra kerülhet..."
+              defaultValue="A "
             />{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F7931A] to-[#f5a623]">
+            <span className="text-[var(--candlie-pink-primary)]">
               <EditableText
                 as="span"
                 contentKey="featuresSection.headingEmphasis"
-                defaultValue="stílusosan"
+                defaultValue="CANDLIE"
               />
-            </span>
+            </span>{' '}
+            <EditableText
+              as="span"
+              contentKey="featuresSection.headingTail"
+              defaultValue="több mint egy gyertya"
+            />
           </h2>
         </motion.div>
 
@@ -76,42 +72,20 @@ export default function FeaturesSection() {
               transition={{ delay: index * 0.1 }}
               className="group relative"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#F7931A]/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
-              <div className="relative bg-[#1a1a1a]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-8 h-full hover:border-[#F7931A]/30 transition-all overflow-hidden">
-                {/* Background Gradient */}
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.color} opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity`} />
-                
-                {/* Icon Container with Emoji */}
-                <div className="relative flex items-center gap-3 mb-6">
-                  
-                  <motion.span 
-                    className="text-4xl"
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  >
-                    <EditableText
-                      as="span"
-                      contentKey={`${feature.contentKeyBase}.emoji`}
-                      defaultValue={feature.emoji}
-                    />
-                  </motion.span>
-                </div>
-                
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--candlie-pink-primary)]/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+              <div className="relative bg-white border border-black/10 rounded-2xl p-8 h-full hover:border-[var(--candlie-pink-primary)]/50 transition-all overflow-hidden">
                 <EditableText
                   as="h3"
-                  className="text-xl font-bold mb-3 group-hover:text-[#F7931A] transition-colors"
+                  className="text-xl font-semibold mb-3 text-black"
                   contentKey={`${feature.contentKeyBase}.title`}
                   defaultValue={feature.title}
                 />
                 <EditableText
                   as="p"
-                  className="text-gray-400 leading-relaxed text-sm"
+                  className="text-black/70 leading-relaxed text-sm"
                   contentKey={`${feature.contentKeyBase}.description`}
                   defaultValue={feature.description}
                 />
-                
-                {/* Decorative Element */}
-                <div className={`absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br ${feature.color} opacity-10 rounded-full blur-2xl`} />
               </div>
             </motion.div>
           ))}

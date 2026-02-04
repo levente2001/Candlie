@@ -106,21 +106,21 @@ export default function AdminShipping() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--candlie-bg)] text-black">
       <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <main className={`transition-all duration-300 ${collapsed ? "ml-20" : "ml-[280px]"}`}>
         <div className="p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-                <Truck className="w-7 h-7 text-[#F7931A]" /> Szállítási módok
+              <h1 className="text-3xl font-semibold mb-2 flex items-center gap-2">
+                <Truck className="w-7 h-7 text-[var(--candlie-pink-primary)]" /> Szállítási módok
               </h1>
-              <p className="text-gray-400">{methods.length} mód</p>
+              <p className="text-black/60">{methods.length} mód</p>
             </div>
             <Button
               onClick={() => openModal()}
-              className="bg-[#F7931A] hover:bg-[#f5a623] text-black font-semibold"
+              className="bg-[var(--candlie-pink-secondary)] hover:bg-[var(--candlie-pink-primary)] text-white font-semibold"
             >
               <Plus className="w-5 h-5 mr-2" />
               Új szállítási mód
@@ -129,7 +129,7 @@ export default function AdminShipping() {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F7931A]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[var(--candlie-pink-primary)]" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -140,7 +140,7 @@ export default function AdminShipping() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-[#1a1a1a] rounded-2xl p-5 border border-white/5"
+                    className="bg-white rounded-2xl p-5 border border-black/10"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
@@ -149,28 +149,28 @@ export default function AdminShipping() {
                           <span
                             className={`text-xs px-2 py-1 rounded-full ${
                               m.active === false
-                                ? "bg-white/10 text-gray-400"
-                                : "bg-emerald-500/20 text-emerald-400"
+                                ? "bg-black/10 text-black/50"
+                                : "bg-emerald-500/20 text-emerald-600"
                             }`}
                           >
                             {m.active === false ? "Inaktív" : "Aktív"}
                           </span>
                         </div>
-                        {m.description && <p className="text-sm text-gray-400 mt-1">{m.description}</p>}
-                        <p className="text-sm text-gray-400 mt-2">
-                          Díj: <span className="text-white">{(m.price ?? 0).toLocaleString("hu-HU")} Ft</span>
+                        {m.description && <p className="text-sm text-black/60 mt-1">{m.description}</p>}
+                        <p className="text-sm text-black/60 mt-2">
+                          Díj: <span className="text-black">{(m.price ?? 0).toLocaleString("hu-HU")} Ft</span>
                           {m.free_over != null && (
                             <>
                               {" "}
                               • Ingyenes{" "}
-                              <span className="text-white">
+                              <span className="text-black">
                                 {(m.free_over ?? 0).toLocaleString("hu-HU")} Ft felett
                               </span>
                             </>
                           )}
                         </p>
-                        {m.eta && <p className="text-xs text-gray-500 mt-1">ETA: {m.eta}</p>}
-                        <p className="text-xs text-gray-500 mt-1">Sort: {m.sort_order ?? "—"}</p>
+                        {m.eta && <p className="text-xs text-black/50 mt-1">ETA: {m.eta}</p>}
+                        <p className="text-xs text-black/50 mt-1">Sort: {m.sort_order ?? "—"}</p>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function AdminShipping() {
                           variant="ghost"
                           size="sm"
                           onClick={() => openModal(m)}
-                          className="text-gray-400 hover:text-white"
+                          className="text-black/60 hover:text-black"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
@@ -186,7 +186,7 @@ export default function AdminShipping() {
                           variant="ghost"
                           size="sm"
                           onClick={() => deleteMutation.mutate(m.id)}
-                          className="text-gray-400 hover:text-red-400"
+                          className="text-black/60 hover:text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -201,29 +201,29 @@ export default function AdminShipping() {
       </main>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-[#1a1a1a] border-white/10 max-w-xl">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Szállítási mód szerkesztése" : "Új szállítási mód"}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label className="text-gray-300">Név *</Label>
+              <Label className="text-black/70">Név *</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                className="mt-2 h-12 rounded-xl"
                 placeholder="pl.: GLS házhozszállítás"
                 required
               />
             </div>
 
             <div>
-              <Label className="text-gray-300">Leírás</Label>
+              <Label className="text-black/70">Leírás</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="mt-2 bg-[#252525] border-white/10 rounded-xl"
+                className="mt-2 rounded-xl"
                 rows={2}
                 placeholder="pl.: kézbesítés munkanapokon"
               />
@@ -231,48 +231,48 @@ export default function AdminShipping() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-gray-300">Díj (Ft)</Label>
+                <Label className="text-black/70">Díj (Ft)</Label>
                 <Input
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                  className="mt-2 h-12 rounded-xl"
                   inputMode="numeric"
                 />
               </div>
               <div>
-                <Label className="text-gray-300">Ingyenes felett (Ft)</Label>
+                <Label className="text-black/70">Ingyenes felett (Ft)</Label>
                 <Input
                   value={form.free_over}
                   onChange={(e) => setForm({ ...form, free_over: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                  className="mt-2 h-12 rounded-xl"
                   placeholder="üres = nincs"
                   inputMode="numeric"
                 />
               </div>
               <div>
-                <Label className="text-gray-300">Sort order</Label>
+                <Label className="text-black/70">Sort order</Label>
                 <Input
                   value={form.sort_order}
                   onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                  className="mt-2 h-12 rounded-xl"
                   inputMode="numeric"
                 />
               </div>
               <div>
-                <Label className="text-gray-300">ETA</Label>
+                <Label className="text-black/70">ETA</Label>
                 <Input
                   value={form.eta}
                   onChange={(e) => setForm({ ...form, eta: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                  className="mt-2 h-12 rounded-xl"
                   placeholder="pl.: 1-2 munkanap"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between bg-[#252525] rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between bg-black/5 rounded-xl p-4 border border-black/10">
               <div>
                 <p className="font-medium">Aktív</p>
-                <p className="text-sm text-gray-400">Checkouton csak az aktív módok látszanak.</p>
+                <p className="text-sm text-black/60">Checkouton csak az aktív módok látszanak.</p>
               </div>
               <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
             </div>
@@ -280,7 +280,7 @@ export default function AdminShipping() {
             <Button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
-              className="w-full h-12 bg-[#F7931A] hover:bg-[#f5a623] text-black font-semibold rounded-xl"
+              className="w-full h-12 bg-[var(--candlie-pink-secondary)] hover:bg-[var(--candlie-pink-primary)] text-white font-semibold rounded-xl"
             >
               {(createMutation.isPending || updateMutation.isPending) ? (
                 <>

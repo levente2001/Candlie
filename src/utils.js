@@ -3,6 +3,8 @@ const pageMap = {
   Products: '/products',
   ProductDetail: '/product',
   About: '/about',
+  Candlie: '/candlie',
+  Contact: '/contact',
   Cart: '/cart',
   Checkout: '/checkout',
 

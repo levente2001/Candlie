@@ -8,9 +8,9 @@ export default function ProductCard({ product, index = 0 }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const badgeColors = {
-    new: 'bg-emerald-500',
-    sale: 'bg-red-500',
-    limited: 'bg-purple-500',
+    new: 'bg-[var(--candlie-pink-primary)]',
+    sale: 'bg-[var(--candlie-pink-secondary)]',
+    limited: 'bg-black',
   };
 
   const addToCart = (e) => {
@@ -18,7 +18,7 @@ export default function ProductCard({ product, index = 0 }) {
     e.stopPropagation();
     
     const cart = JSON.parse(localStorage.getItem('cryptoCart') || '[]');
-    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === 'M');
+    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === 'ONE');
     
     if (existingIndex > -1) {
       cart[existingIndex].quantity += 1;
@@ -28,7 +28,7 @@ export default function ProductCard({ product, index = 0 }) {
         name: product.name,
         price: product.price,
         image_url: product.image_url,
-        size: 'M',
+        size: 'ONE',
         quantity: 1,
       });
     }
@@ -50,7 +50,7 @@ export default function ProductCard({ product, index = 0 }) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/5 hover:border-[#F7931A]/30 transition-all duration-500">
+        <div className="relative bg-white rounded-2xl overflow-hidden border border-black/10 hover:border-[var(--candlie-pink-primary)]/40 transition-all duration-500">
           {/* Badge */}
           {product.badge && (
             <div className={`absolute top-4 left-4 z-10 ${badgeColors[product.badge]} px-3 py-1 rounded-full text-xs font-bold text-white uppercase`}>
@@ -61,7 +61,7 @@ export default function ProductCard({ product, index = 0 }) {
           )}
 
           {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#252525] to-[#1a1a1a]">
+          <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#f7f2f7] to-white">
             <motion.img
               src={product.image_url}
               alt={product.name}
@@ -82,22 +82,22 @@ export default function ProductCard({ product, index = 0 }) {
 
             {/* Overlay Actions */}
             <motion.div
-              className="absolute inset-0 bg-black/50 flex items-center justify-center gap-3"
+              className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: isHovered ? 1 : 0 }}
               transition={{ duration: 0.3 }}
             >
               <motion.button
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={addToCart}
-                className="w-12 h-12 bg-[#F7931A] rounded-xl flex items-center justify-center text-black hover:bg-[#f5a623] transition-colors"
+                className="w-12 h-12 bg-[var(--candlie-pink-secondary)] rounded-xl flex items-center justify-center text-white hover:bg-[var(--candlie-pink-primary)] transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
               </motion.button>
               <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-black"
+                whileHover={{ scale: 1.05 }}
+                className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-black border border-black/10"
               >
                 <Eye className="w-5 h-5" />
               </motion.div>
@@ -106,15 +106,15 @@ export default function ProductCard({ product, index = 0 }) {
 
           {/* Content */}
           <div className="p-5">
-            <h3 className="font-semibold text-white group-hover:text-[#F7931A] transition-colors line-clamp-1">
+            <h3 className="font-semibold text-black group-hover:text-[var(--candlie-pink-primary)] transition-colors line-clamp-1">
               {product.name}
             </h3>
             <div className="flex items-center gap-3 mt-3">
-              <span className="text-xl font-bold text-[#F7931A]">
+              <span className="text-xl font-semibold text-[var(--candlie-pink-secondary)]">
                 {product.price?.toLocaleString('hu-HU')} Ft
               </span>
               {product.original_price && product.original_price > product.price && (
-                <span className="text-sm text-gray-500 line-through">
+                <span className="text-sm text-black/40 line-through">
                   {product.original_price?.toLocaleString('hu-HU')} Ft
                 </span>
               )}

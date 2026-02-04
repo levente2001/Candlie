@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 function calcShippingAmount(method, subtotal) {
   if (!method) return 0;
@@ -30,6 +31,8 @@ export default function Checkout() {
 
   // 'stripe' | 'cod'
   const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [careAccepted, setCareAccepted] = useState(false);
+  const [showCareModal, setShowCareModal] = useState(false);
 
   // COD success UX
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -81,6 +84,7 @@ export default function Checkout() {
 
     if (cart.length === 0) return setError('A kosarad üres.');
     if (activeShipping.length > 0 && !selectedShipping) return setError('Válassz szállítási módot.');
+    if (!careAccepted) return setError('A továbbhaladáshoz el kell fogadnod a CANDLIE Care útmutatót.');
 
     setIsSubmitting(true);
 
@@ -181,20 +185,20 @@ export default function Checkout() {
     // COD success után is ide jutunk (cart cleared) — ilyenkor mutassunk visszajelzést
     if (orderPlaced) {
       return (
-        <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
-          <div className="max-w-xl w-full bg-[#1a1a1a] rounded-2xl p-8 border border-white/5 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 mb-4">
+        <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-[var(--candlie-bg)]">
+          <div className="max-w-xl w-full bg-white rounded-2xl p-8 border border-black/10 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 mb-4">
               <Banknote className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Rendelés rögzítve (utánvét)</h2>
-            <p className="text-gray-400 mb-6">
-              Köszönjük! A rendelésed státusza <span className="text-gray-200 font-semibold">pending</span>.
+            <h2 className="text-2xl font-semibold mb-2">Rendelés rögzítve (utánvét)</h2>
+            <p className="text-black/70 mb-6">
+              Köszönjük! A rendelésed státusza <span className="text-black font-semibold">pending</span>.
               <br />
-              Rendelés azonosító: <span className="text-gray-200 font-semibold">{placedOrderId}</span>
+              Rendelés azonosító: <span className="text-black font-semibold">{placedOrderId}</span>
             </p>
             <Link
               to={createPageUrl('Products')}
-              className="inline-flex items-center justify-center h-12 px-5 rounded-xl bg-gradient-to-r from-[#F7931A] to-[#f5a623] text-black font-semibold"
+              className="inline-flex items-center justify-center h-12 px-5 rounded-xl bg-[var(--candlie-pink-secondary)] text-white font-semibold"
             >
               Vissza a termékekhez
             </Link>
@@ -204,10 +208,10 @@ export default function Checkout() {
     }
 
     return (
-      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-[var(--candlie-bg)]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">A kosarad üres</h2>
-          <Link to={createPageUrl('Products')} className="text-[#F7931A] hover:underline">
+          <h2 className="text-2xl font-semibold mb-4">A kosarad üres</h2>
+          <Link to={createPageUrl('Products')} className="text-[var(--candlie-pink-primary)] hover:underline">
             Vissza a termékekhez
           </Link>
         </div>
@@ -216,22 +220,22 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20">
+    <div className="min-h-screen pt-24 pb-20 bg-[var(--candlie-bg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           to={createPageUrl('Cart')}
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-black/60 hover:text-black mb-8 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           Vissza a kosárhoz
         </Link>
 
         {canceled && (
-          <div className="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-yellow-200 flex gap-3">
+          <div className="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-yellow-800 flex gap-3">
             <AlertTriangle className="w-5 h-5 mt-0.5" />
             <div>
               <p className="font-semibold">A fizetés megszakadt</p>
-              <p className="text-sm text-yellow-200/80">Nyugodtan próbáld újra, a kosarad megmaradt.</p>
+              <p className="text-sm text-yellow-800/80">Nyugodtan próbáld újra, a kosarad megmaradt.</p>
             </div>
           </div>
         )}
@@ -239,7 +243,7 @@ export default function Checkout() {
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-bold mb-8"
+          className="text-3xl md:text-4xl font-semibold mb-8"
         >
           Pénztár
         </motion.h1>
@@ -252,70 +256,70 @@ export default function Checkout() {
             className="lg:col-span-2 space-y-6"
           >
             {error && (
-              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-200 flex gap-3">
+              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-800 flex gap-3">
                 <AlertTriangle className="w-5 h-5 mt-0.5" />
                 <div>
                   <p className="font-semibold">Hiba</p>
-                  <p className="text-sm text-red-200/80">{error}</p>
+                  <p className="text-sm text-red-800/80">{error}</p>
                 </div>
               </div>
             )}
 
-            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5">
-              <h2 className="text-xl font-bold mb-6">Személyes adatok</h2>
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <h2 className="text-xl font-semibold mb-6">Személyes adatok</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name" className="text-gray-300">Teljes név *</Label>
+                  <Label htmlFor="name" className="text-black/70">Teljes név *</Label>
                   <Input
                     id="name"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                    className="mt-2 h-12 rounded-xl"
                     placeholder="Kovács János"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email" className="text-gray-300">E-mail cím *</Label>
+                  <Label htmlFor="email" className="text-black/70">E-mail cím *</Label>
                   <Input
                     id="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                    className="mt-2 h-12 rounded-xl"
                     placeholder="email@example.com"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="phone" className="text-gray-300">Telefonszám *</Label>
+                  <Label htmlFor="phone" className="text-black/70">Telefonszám *</Label>
                   <Input
                     id="phone"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl"
+                    className="mt-2 h-12 rounded-xl"
                     placeholder="+36 30 123 4567"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5">
-              <h2 className="text-xl font-bold mb-6">Szállítás</h2>
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <h2 className="text-xl font-semibold mb-6">Szállítás</h2>
 
               {shippingLoading ? (
-                <div className="flex items-center gap-3 text-gray-300">
+                <div className="flex items-center gap-3 text-black/60">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Szállítási módok betöltése...
                 </div>
               ) : activeShipping.length === 0 ? (
-                <p className="text-gray-400">Nincs beállított szállítási mód (Admin → Kiszállítás).</p>
+                <p className="text-black/60">Nincs beállított szállítási mód (Admin → Kiszállítás).</p>
               ) : (
                 <div>
-                  <Label className="text-gray-300">Szállítási mód *</Label>
+                  <Label className="text-black/70">Szállítási mód *</Label>
                   <Select value={shippingId} onValueChange={setShippingId}>
-                    <SelectTrigger className="mt-2 bg-[#252525] border-white/10 h-12 rounded-xl">
+                    <SelectTrigger className="mt-2 h-12 rounded-xl">
                       <SelectValue placeholder="Válassz" />
                     </SelectTrigger>
                     <SelectContent>
@@ -331,10 +335,10 @@ export default function Checkout() {
                     </SelectContent>
                   </Select>
 
-                  {selectedShipping?.description && <p className="text-sm text-gray-400 mt-2">{selectedShipping.description}</p>}
-                  {selectedShipping?.eta && <p className="text-xs text-gray-500 mt-1">ETA: {selectedShipping.eta}</p>}
+                  {selectedShipping?.description && <p className="text-sm text-black/60 mt-2">{selectedShipping.description}</p>}
+                  {selectedShipping?.eta && <p className="text-xs text-black/50 mt-1">ETA: {selectedShipping.eta}</p>}
                   {selectedShipping?.free_over != null && subtotal < selectedShipping.free_over && (
-                    <p className="text-sm text-[#F7931A] mt-2">
+                    <p className="text-sm text-[var(--candlie-pink-secondary)] mt-2">
                       Még {(selectedShipping.free_over - subtotal).toLocaleString('hu-HU')} Ft és ingyenes lesz a szállítás
                     </p>
                   )}
@@ -342,25 +346,25 @@ export default function Checkout() {
               )}
 
               <div className="mt-6">
-                <Label htmlFor="address" className="text-gray-300">Szállítási cím *</Label>
+                <Label htmlFor="address" className="text-black/70">Szállítási cím *</Label>
                 <Textarea
                   id="address"
                   required
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 rounded-xl"
+                  className="mt-2 rounded-xl"
                   placeholder="1234 Budapest, Példa utca 12."
                   rows={3}
                 />
               </div>
 
               <div className="mt-4">
-                <Label htmlFor="notes" className="text-gray-300">Megjegyzés (opcionális)</Label>
+                <Label htmlFor="notes" className="text-black/70">Megjegyzés (opcionális)</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10 rounded-xl"
+                  className="mt-2 rounded-xl"
                   placeholder="Pl.: csengőnél hívjon"
                   rows={2}
                 />
@@ -368,8 +372,8 @@ export default function Checkout() {
             </div>
 
             {/* Fizetési mód */}
-            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5">
-              <h2 className="text-xl font-bold mb-4">Fizetési mód</h2>
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <h2 className="text-xl font-semibold mb-4">Fizetési mód</h2>
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <button
@@ -377,19 +381,19 @@ export default function Checkout() {
                   onClick={() => setPaymentMethod('stripe')}
                   className={`text-left rounded-2xl p-4 border transition-all ${
                     paymentMethod === 'stripe'
-                      ? 'border-[#F7931A]/60 bg-[#252525]'
-                      : 'border-white/10 bg-[#141414] hover:bg-[#1f1f1f]'
+                      ? 'border-[var(--candlie-pink-primary)]/60 bg-[#f7f2f7]'
+                      : 'border-black/10 bg-white hover:bg-black/5'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      paymentMethod === 'stripe' ? 'bg-[#F7931A]/15 text-[#F7931A]' : 'bg-white/5 text-gray-300'
+                      paymentMethod === 'stripe' ? 'bg-[var(--candlie-pink-primary)]/15 text-[var(--candlie-pink-primary)]' : 'bg-black/5 text-black/50'
                     }`}>
                       <CreditCard className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="font-semibold">Bankkártya (Stripe)</div>
-                      <div className="text-xs text-gray-400">Biztonságos online fizetés</div>
+                      <div className="text-xs text-black/60">Biztonságos online fizetés</div>
                     </div>
                   </div>
                 </button>
@@ -399,36 +403,59 @@ export default function Checkout() {
                   onClick={() => setPaymentMethod('cod')}
                   className={`text-left rounded-2xl p-4 border transition-all ${
                     paymentMethod === 'cod'
-                      ? 'border-[#F7931A]/60 bg-[#252525]'
-                      : 'border-white/10 bg-[#141414] hover:bg-[#1f1f1f]'
+                      ? 'border-[var(--candlie-pink-primary)]/60 bg-[#f7f2f7]'
+                      : 'border-black/10 bg-white hover:bg-black/5'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      paymentMethod === 'cod' ? 'bg-[#F7931A]/15 text-[#F7931A]' : 'bg-white/5 text-gray-300'
+                      paymentMethod === 'cod' ? 'bg-[var(--candlie-pink-primary)]/15 text-[var(--candlie-pink-primary)]' : 'bg-black/5 text-black/50'
                     }`}>
                       <Banknote className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="font-semibold">Utánvét</div>
-                      <div className="text-xs text-gray-400">Fizetés átvételkor</div>
+                      <div className="text-xs text-black/60">Fizetés átvételkor</div>
                     </div>
                   </div>
                 </button>
               </div>
 
-              <p className="text-xs text-gray-500 mt-3">
+              <p className="text-xs text-black/50 mt-3">
                 {paymentMethod === 'stripe'
                   ? 'A gombra kattintva átirányítunk a Stripe biztonságos fizetési oldalára.'
                   : 'A rendelésed rögzítjük, a fizetés átvételkor történik. A rendelés státusza: pending.'}
               </p>
             </div>
 
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <div className="flex items-start gap-3">
+                <input
+                  id="careAccept"
+                  type="checkbox"
+                  checked={careAccepted}
+                  onChange={(e) => setCareAccepted(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
+                />
+                <label htmlFor="careAccept" className="text-sm text-black/70">
+                  Elolvastam és elfogadom a{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowCareModal(true)}
+                    className="text-[var(--candlie-pink-primary)] underline underline-offset-2"
+                  >
+                    CANDLIE Care – Gyertyakezelés és biztonsági útmutatót
+                  </button>
+                  .
+                </label>
+              </div>
+            </div>
+
             {/* CTA */}
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-14 bg-gradient-to-r from-[#F7931A] to-[#f5a623] text-black font-semibold text-lg rounded-xl hover:shadow-lg hover:shadow-[#F7931A]/25 transition-all"
+              disabled={isSubmitting || !careAccepted}
+              className="w-full h-14 bg-[var(--candlie-pink-secondary)] text-white font-semibold text-lg rounded-xl hover:shadow-lg hover:shadow-[var(--candlie-pink-primary)]/25 transition-all"
             >
               {isSubmitting ? (
                 <>
@@ -455,35 +482,67 @@ export default function Checkout() {
             transition={{ delay: 0.2 }}
             className="lg:col-span-1"
           >
-            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 sticky top-28">
-              <h2 className="text-xl font-bold mb-6">Összesítés</h2>
+            <div className="bg-white rounded-2xl p-6 border border-black/10 sticky top-28">
+              <h2 className="text-xl font-semibold mb-6">Összesítés</h2>
 
               <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-gray-400">
+                <div className="flex justify-between text-black/60">
                   <span>Részösszeg</span>
                   <span>{subtotal.toLocaleString('hu-HU')} Ft</span>
                 </div>
 
-                <div className="flex justify-between text-gray-400">
+                <div className="flex justify-between text-black/60">
                   <span>Szállítás</span>
                   <span>{shippingAmount === 0 ? 'Ingyenes' : `${shippingAmount.toLocaleString('hu-HU')} Ft`}</span>
                 </div>
 
-                <div className="border-t border-white/10 pt-4">
-                  <div className="flex justify-between text-lg font-bold">
+                <div className="border-t border-black/10 pt-4">
+                  <div className="flex justify-between text-lg font-semibold">
                     <span>Összesen</span>
-                    <span className="text-[#F7931A]">{total.toLocaleString('hu-HU')} Ft</span>
+                    <span className="text-[var(--candlie-pink-secondary)]">{total.toLocaleString('hu-HU')} Ft</span>
                   </div>
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500">
-                * Az árak forintban értendők, tartalmazzák a <span className="text-gray-300">27%-os</span> áfát.
+              <div className="text-xs text-black/50">
+                * Az árak forintban értendők, tartalmazzák a <span className="text-black/70">27%-os</span> áfát.
               </div>
             </div>
           </motion.div>
         </div>
       </div>
+
+      <Dialog open={showCareModal} onOpenChange={setShowCareModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              CANDLIE Care – Gyertyakezelés és biztonsági útmutató
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-black/70">
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>Ne égesd 4 óránál tovább a gyertyád egy huzamban!</li>
+              <li>Mindig vágd vissza a kanóc végét a gyertya meggyújtása előtt 0,5 cm-re a tökéletes és tiszta égés érdekében!</li>
+              <li>Hagyd, hogy a gyertyád széle is megolvadjon, hogy elkerüld az üregesedést!</li>
+              <li>Gyerekek és kisállatok elől távol tartandó!</li>
+              <li>Ne tedd ki a gyertyát közvetlen hőforrásnak!</li>
+              <li>A gyertyát stabil, egyenes helyen égesd, bármilyen gyúlékony tárgytól távol tartva!</li>
+              <li>Soha ne hagyd a gyertyát felügyelet nélkül!</li>
+              <li>A gyertya fogyasztásra nem alkalmas, kizárólag dekoráció!</li>
+            </ol>
+            <p>
+              Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés – úgynevezett frosting –
+              jelenik meg, ami a 100% szója­viaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja.
+              Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának!
+            </p>
+            <p>
+              A megrendelés leadásával a vásárló igazolja, hogy elolvasta és megismerte a fenti tájékoztatót,
+              valamint a termékek használata során betartja azokban foglalt biztonsági előírásokat.
+              A CANDLIE nem vállal felelősséget az előírások be nem tartásából eredő károkért vagy sérülésekért.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

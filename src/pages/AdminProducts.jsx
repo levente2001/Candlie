@@ -18,10 +18,6 @@ import {
 } from '@/components/ui/dialog';
 
 const categories = [
-  { id: 'bitcoin', name: 'Bitcoin' },
-  { id: 'ethereum', name: 'Ethereum' },
-  { id: 'altcoin', name: 'Altcoin' },
-  { id: 'meme', name: 'Meme' },
   { id: 'limited', name: 'Limitált' },
 ];
 
@@ -41,7 +37,7 @@ export default function AdminProducts() {
 
   const queryClient = useQueryClient();
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['admin-products'],
     queryFn: () => base44.entities.Product.list('-created_date'),
   });
@@ -148,7 +144,7 @@ export default function AdminProducts() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--candlie-bg)] text-black">
       <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       
       <main className={`transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-[280px]'}`}>
@@ -156,12 +152,12 @@ export default function AdminProducts() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Termékek</h1>
-              <p className="text-gray-400">{products.length} termék</p>
+              <h1 className="text-3xl font-semibold mb-2">Termékek</h1>
+              <p className="text-black/60">{products.length} termék</p>
             </div>
             <Button
               onClick={() => openModal()}
-              className="bg-[#F7931A] hover:bg-[#f5a623] text-black font-semibold"
+              className="bg-[var(--candlie-pink-secondary)] hover:bg-[var(--candlie-pink-primary)] text-white font-semibold"
             >
               <Plus className="w-5 h-5 mr-2" />
               Új termék
@@ -170,19 +166,29 @@ export default function AdminProducts() {
 
           {/* Search */}
           <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black/40" />
             <Input
               placeholder="Keresés név szerint..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 bg-[#1a1a1a] border-white/10 h-12 rounded-xl"
+              className="pl-12 h-12 rounded-xl"
             />
           </div>
 
           {/* Products Grid */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F7931A]" />
+              <Loader2 className="w-8 h-8 animate-spin text-[var(--candlie-pink-primary)]" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-20 text-red-600">
+              <p className="font-semibold">Nem sikerült betölteni a termékeket.</p>
+              <p className="text-sm">{error?.message || 'Ismeretlen hiba'}</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-20 text-black/60">
+              <p className="font-semibold">Nincs megjeleníthető termék.</p>
+              <p className="text-sm">Ellenőrizd a keresést vagy a Firebase kapcsolatot.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -193,7 +199,7 @@ export default function AdminProducts() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/5"
+                    className="bg-white rounded-2xl overflow-hidden border border-black/10"
                   >
                     <div className="aspect-square relative">
                       <img
@@ -202,8 +208,8 @@ export default function AdminProducts() {
                         className="w-full h-full object-cover"
                       />
                       {!product.is_active && (
-                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-                          <span className="text-gray-400 font-medium">Inaktív</span>
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-white font-medium">Inaktív</span>
                         </div>
                       )}
                       {product.badge && (
@@ -220,11 +226,11 @@ export default function AdminProducts() {
                     <div className="p-4">
                       <h3 className="font-semibold truncate">{product.name}</h3>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-lg font-bold text-[#F7931A]">
+                        <span className="text-lg font-semibold text-[var(--candlie-pink-secondary)]">
                           {product.price?.toLocaleString('hu-HU')} Ft
                         </span>
                         {product.original_price && (
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-sm text-black/40 line-through">
                             {product.original_price?.toLocaleString('hu-HU')} Ft
                           </span>
                         )}
@@ -234,7 +240,7 @@ export default function AdminProducts() {
                           variant="outline"
                           size="sm"
                           onClick={() => openModal(product)}
-                          className="flex-1 border-white/10 hover:bg-[#252525]"
+                          className="flex-1 border-black/10 hover:bg-black/5"
                         >
                           <Edit2 className="w-4 h-4 mr-1" />
                           Szerkesztés
@@ -259,7 +265,7 @@ export default function AdminProducts() {
 
       {/* Product Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-[#1a1a1a] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingProduct ? 'Termék szerkesztése' : 'Új termék'}</DialogTitle>
           </DialogHeader>
@@ -271,7 +277,7 @@ export default function AdminProducts() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10"
+                  className="mt-2"
                   placeholder="Bitcoin HODL Póló"
                 />
               </div>
@@ -281,7 +287,7 @@ export default function AdminProducts() {
                   value={formData.category}
                   onValueChange={(v) => setFormData({ ...formData, category: v })}
                 >
-                  <SelectTrigger className="mt-2 bg-[#252525] border-white/10">
+                  <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -298,7 +304,7 @@ export default function AdminProducts() {
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-2 bg-[#252525] border-white/10"
+                className="mt-2"
                 rows={3}
                 placeholder="Termék leírása..."
               />
@@ -312,7 +318,7 @@ export default function AdminProducts() {
                   required
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10"
+                  className="mt-2"
                   placeholder="8500"
                 />
               </div>
@@ -322,7 +328,7 @@ export default function AdminProducts() {
                   type="number"
                   value={formData.original_price}
                   onChange={(e) => setFormData({ ...formData, original_price: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10"
+                  className="mt-2"
                   placeholder="10990"
                 />
               </div>
@@ -332,7 +338,7 @@ export default function AdminProducts() {
                   type="number"
                   value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  className="mt-2 bg-[#252525] border-white/10"
+                  className="mt-2"
                   placeholder="100"
                 />
               </div>
@@ -345,7 +351,7 @@ export default function AdminProducts() {
                   value={formData.badge}
                   onValueChange={(v) => setFormData({ ...formData, badge: v })}
                 >
-                  <SelectTrigger className="mt-2 bg-[#252525] border-white/10">
+                  <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -355,7 +361,7 @@ export default function AdminProducts() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center justify-between p-4 bg-[#252525] rounded-xl mt-auto">
+              <div className="flex items-center justify-between p-4 bg-black/5 rounded-xl mt-auto">
                 <Label>Aktív termék</Label>
                 <Switch
                   checked={formData.is_active}
@@ -376,11 +382,11 @@ export default function AdminProducts() {
                     <Input
                       value={formData.image_url}
                       onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      className="bg-[#252525] border-white/10 flex-1"
+                      className="flex-1"
                       placeholder="URL vagy feltöltés"
                     />
-                    <label className="flex items-center justify-center w-12 h-10 bg-[#252525] rounded-lg cursor-pointer hover:bg-[#303030] transition-colors">
-                      <ImagePlus className="w-5 h-5 text-gray-400" />
+                    <label className="flex items-center justify-center w-12 h-10 bg-black/5 rounded-lg cursor-pointer hover:bg-black/10 transition-colors border border-black/10">
+                      <ImagePlus className="w-5 h-5 text-black/50" />
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'image_url')} />
                     </label>
                   </div>
@@ -396,11 +402,11 @@ export default function AdminProducts() {
                     <Input
                       value={formData.hover_image_url}
                       onChange={(e) => setFormData({ ...formData, hover_image_url: e.target.value })}
-                      className="bg-[#252525] border-white/10 flex-1"
+                      className="flex-1"
                       placeholder="URL vagy feltöltés"
                     />
-                    <label className="flex items-center justify-center w-12 h-10 bg-[#252525] rounded-lg cursor-pointer hover:bg-[#303030] transition-colors">
-                      <ImagePlus className="w-5 h-5 text-gray-400" />
+                    <label className="flex items-center justify-center w-12 h-10 bg-black/5 rounded-lg cursor-pointer hover:bg-black/10 transition-colors border border-black/10">
+                      <ImagePlus className="w-5 h-5 text-black/50" />
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'hover_image_url')} />
                     </label>
                   </div>
@@ -413,14 +419,14 @@ export default function AdminProducts() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 border-white/10"
+                className="flex-1 border-black/10"
               >
                 Mégse
               </Button>
               <Button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending || isUploading}
-                className="flex-1 bg-[#F7931A] hover:bg-[#f5a623] text-black"
+                className="flex-1 bg-[var(--candlie-pink-secondary)] hover:bg-[var(--candlie-pink-primary)] text-white"
               >
                 {(createMutation.isPending || updateMutation.isPending) ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

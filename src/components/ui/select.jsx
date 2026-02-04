@@ -48,7 +48,7 @@ export function Select({ value, onValueChange, children }) {
       value={value}
       onChange={(e) => onValueChange?.(e.target.value)}
       className={cn(
-        'w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#F7931A]/40',
+        'w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[var(--candlie-pink-primary)]/40',
         triggerClassName
       )}
     >

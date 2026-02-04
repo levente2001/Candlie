@@ -22,7 +22,7 @@ import {
   Cell,
 } from 'recharts';
 
-const COLORS = ['#F7931A', '#627EEA', '#2775CA', '#26A17B', '#8247E5'];
+const COLORS = ['#986299', '#735573', '#c3a1c7', '#b88fba', '#a87aa8'];
 
 export default function AdminDashboard() {
   const [collapsed, setCollapsed] = useState(false);
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
   const recentOrders = filteredOrders.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--candlie-bg)] text-black">
       <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <main className={`transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-[280px]'}`}>
@@ -185,31 +185,31 @@ export default function AdminDashboard() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-              <p className="text-gray-400">Üdv! Itt követheted a bolt teljesítményét.</p>
+              <h1 className="text-3xl font-semibold mb-2">Dashboard</h1>
+              <p className="text-black/60">Üdv! Itt követheted a bolt teljesítményét.</p>
             </div>
           </div>
 
           {/* Dátum szűrés */}
-          <div className="mt-6 mb-8 bg-[#1a1a1a] rounded-2xl p-4 border border-white/5">
+          <div className="mt-6 mb-8 bg-white rounded-2xl p-4 border border-black/10">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <span className="text-sm text-gray-400 w-24">Kezdő</span>
+                <span className="text-sm text-black/50 w-24">Kezdő</span>
                 <input
                   type="date"
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
-                  className="bg-[#252525] border border-white/10 rounded-xl h-10 px-3 text-gray-200"
+                  className="bg-white border border-black/10 rounded-xl h-10 px-3 text-black"
                 />
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <span className="text-sm text-gray-400 w-24">Vég</span>
+                <span className="text-sm text-black/50 w-24">Vég</span>
                 <input
                   type="date"
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
-                  className="bg-[#252525] border border-white/10 rounded-xl h-10 px-3 text-gray-200"
+                  className="bg-white border border-black/10 rounded-xl h-10 px-3 text-black"
                 />
               </div>
 
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                     setFromDate(format(subDays(new Date(), 6), 'yyyy-MM-dd'));
                     setToDate(format(new Date(), 'yyyy-MM-dd'));
                   }}
-                  className="px-3 h-10 rounded-xl bg-[#252525] border border-white/10 text-sm hover:bg-[#2b2b2b]"
+                  className="px-3 h-10 rounded-xl bg-white border border-black/10 text-sm hover:bg-black/5"
                 >
                   Utolsó 7 nap
                 </button>
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
                     setFromDate(format(subDays(new Date(), 29), 'yyyy-MM-dd'));
                     setToDate(format(new Date(), 'yyyy-MM-dd'));
                   }}
-                  className="px-3 h-10 rounded-xl bg-[#252525] border border-white/10 text-sm hover:bg-[#2b2b2b]"
+                  className="px-3 h-10 rounded-xl bg-white border border-black/10 text-sm hover:bg-black/5"
                 >
                   Utolsó 30 nap
                 </button>
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
                     setFromDate(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
                     setToDate(format(new Date(), 'yyyy-MM-dd'));
                   }}
-                  className="px-3 h-10 rounded-xl bg-[#252525] border border-white/10 text-sm hover:bg-[#2b2b2b]"
+                  className="px-3 h-10 rounded-xl bg-white border border-black/10 text-sm hover:bg-black/5"
                 >
                   Ez a hónap
                 </button>
@@ -253,16 +253,16 @@ export default function AdminDashboard() {
                     setFromDate('');
                     setToDate('');
                   }}
-                  className="px-3 h-10 rounded-xl bg-[#252525] border border-white/10 text-sm hover:bg-[#2b2b2b]"
+                  className="px-3 h-10 rounded-xl bg-white border border-black/10 text-sm hover:bg-black/5"
                 >
                   Összes
                 </button>
               </div>
             </div>
 
-            <div className="mt-3 text-xs text-gray-500">
-              Szűrt rendelések: <span className="text-gray-300">{filteredOrders.length}</span> • Fizetett rendelések:{' '}
-              <span className="text-gray-300">{paidOrders.length}</span>
+            <div className="mt-3 text-xs text-black/50">
+              Szűrt rendelések: <span className="text-black/70">{filteredOrders.length}</span> • Fizetett rendelések:{' '}
+              <span className="text-black/70">{paidOrders.length}</span>
             </div>
           </div>
 
@@ -312,14 +312,14 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Termékek száma</p>
-                  <h3 className="text-2xl font-bold">{products.length}</h3>
+                  <p className="text-black/60 text-sm mb-1">Termékek száma</p>
+                  <h3 className="text-2xl font-semibold">{products.length}</h3>
                 </div>
-                <Package className="w-8 h-8 text-[#F7931A]" />
+                <Package className="w-8 h-8 text-[var(--candlie-pink-primary)]" />
               </div>
             </motion.div>
 
@@ -327,14 +327,14 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Átlag rendelés</p>
-                  <h3 className="text-2xl font-bold">{Math.round(averageOrderValue).toLocaleString('hu-HU')} Ft</h3>
+                  <p className="text-black/60 text-sm mb-1">Átlag rendelés</p>
+                  <h3 className="text-2xl font-semibold">{Math.round(averageOrderValue).toLocaleString('hu-HU')} Ft</h3>
                 </div>
-                <TrendingUp className="w-8 h-8 text-[#8247E5]" />
+                <TrendingUp className="w-8 h-8 text-[var(--candlie-pink-secondary)]" />
               </div>
             </motion.div>
 
@@ -342,14 +342,14 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Egyedi látogatók</p>
-                  <h3 className="text-2xl font-bold">{uniqueSessions}</h3>
+                  <p className="text-black/60 text-sm mb-1">Egyedi látogatók</p>
+                  <h3 className="text-2xl font-semibold">{uniqueSessions}</h3>
                 </div>
-                <Users className="w-8 h-8 text-[#F7931A]" />
+                <Users className="w-8 h-8 text-[var(--candlie-pink-primary)]" />
               </div>
             </motion.div>
 
@@ -357,14 +357,14 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Mai látogatók</p>
-                  <h3 className="text-2xl font-bold">{todayViews}</h3>
+                  <p className="text-black/60 text-sm mb-1">Mai látogatók</p>
+                  <h3 className="text-2xl font-semibold">{todayViews}</h3>
                 </div>
-                <Eye className="w-8 h-8 text-[#627EEA]" />
+                <Eye className="w-8 h-8 text-[var(--candlie-pink-secondary)]" />
               </div>
             </motion.div>
           </div>
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 mb-8"
+            className="bg-white rounded-2xl p-6 border border-black/10 mb-8"
           >
             <h3 className="text-lg font-semibold mb-6">Legnépszerűbb oldalak</h3>
             <div className="space-y-4">
@@ -392,12 +392,12 @@ export default function AdminDashboard() {
                       <div key={page} className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-300">{page || 'Home'}</span>
-                            <span className="text-sm font-semibold text-white">{count} megtekintés</span>
+                            <span className="text-sm text-black/60">{page || 'Home'}</span>
+                            <span className="text-sm font-semibold text-black">{count} megtekintés</span>
                           </div>
-                          <div className="w-full bg-[#252525] rounded-full h-2">
+                          <div className="w-full bg-black/5 rounded-full h-2">
                             <div
-                              className="bg-gradient-to-r from-[#F7931A] to-[#f5a623] h-2 rounded-full transition-all"
+                              className="bg-[var(--candlie-pink-secondary)] h-2 rounded-full transition-all"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -416,14 +416,10 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="xl:col-span-2 bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="xl:col-span-2 bg-white rounded-2xl p-6 border border-black/10"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold">Bevétel (fizetett) - Utolsó 7 nap</h3>
-                <div className="flex items-center gap-2 text-sm">
-                  <ArrowUpRight className="w-4 h-4 text-emerald-500" />
-                  <span className="text-emerald-500">+12.5%</span>
-                </div>
               </div>
 
               <div className="h-[300px]">
@@ -431,26 +427,26 @@ export default function AdminDashboard() {
                   <AreaChart data={last7Days}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F7931A" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#F7931A" stopOpacity={0} />
+                        <stop offset="5%" stopColor="var(--candlie-pink-primary)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="var(--candlie-pink-primary)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis dataKey="date" stroke="#666" />
-                    <YAxis stroke="#666" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis dataKey="date" stroke="#888" />
+                    <YAxis stroke="#888" />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#252525',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         borderRadius: '12px',
                       }}
-                      labelStyle={{ color: '#fff' }}
+                      labelStyle={{ color: '#000' }}
                       formatter={(value) => [`${Number(value).toLocaleString('hu-HU')} Ft`, 'Bevétel']}
                     />
                     <Area
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#F7931A"
+                      stroke="var(--candlie-pink-primary)"
                       fillOpacity={1}
                       fill="url(#colorRevenue)"
                     />
@@ -464,7 +460,7 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <h3 className="text-lg font-semibold mb-6">Kategóriák</h3>
               <div className="h-[200px]">
@@ -485,8 +481,8 @@ export default function AdminDashboard() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#252525',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         borderRadius: '12px',
                       }}
                     />
@@ -502,7 +498,7 @@ export default function AdminDashboard() {
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
-                      <span className="text-sm text-gray-300">{item.name}</span>
+                      <span className="text-sm text-black/60">{item.name}</span>
                     </div>
                     <span className="text-sm font-semibold">{item.value}</span>
                   </div>
@@ -518,23 +514,23 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <h3 className="text-lg font-semibold mb-6">Legutóbbi rendelések</h3>
               <div className="space-y-4">
                 {recentOrders.length === 0 ? (
-                  <p className="text-gray-400">Nincs rendelés ebben az időszakban.</p>
+                  <p className="text-black/60">Nincs rendelés ebben az időszakban.</p>
                 ) : (
                   recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 bg-[#252525] rounded-xl">
+                    <div key={order.id} className="flex items-center justify-between p-4 bg-black/5 rounded-xl">
                       <div>
                         <p className="font-medium">{order.customer_name}</p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-black/50">
                           {format(new Date(order.created_date), 'MMM d, HH:mm', { locale: hu })}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-[#F7931A]">
+                        <p className="font-semibold text-[var(--candlie-pink-secondary)]">
                           {Number(order.total_amount || 0).toLocaleString('hu-HU')} Ft
                         </p>
                         <span
@@ -549,7 +545,7 @@ export default function AdminDashboard() {
                               ? 'bg-purple-500/20 text-purple-500'
                               : order.status === 'delivered'
                               ? 'bg-emerald-500/20 text-emerald-500'
-                              : 'bg-gray-500/20 text-gray-300'
+                              : 'bg-gray-500/20 text-gray-600'
                           }`}
                         >
                           {order.status === 'payment_pending' && 'Fizetésre vár'}
@@ -570,19 +566,19 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
-              className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5"
+              className="bg-white rounded-2xl p-6 border border-black/10"
             >
               <h3 className="text-lg font-semibold mb-6">Rendelések státusz szerint</h3>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={statusData} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis type="number" stroke="#666" />
-                    <YAxis dataKey="name" type="category" stroke="#666" width={110} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis type="number" stroke="#888" />
+                    <YAxis dataKey="name" type="category" stroke="#888" width={110} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#252525',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         borderRadius: '12px',
                       }}
                     />

@@ -77,7 +77,7 @@ export default function EditableText({
       className={[
         className,
         editable
-          ? 'cursor-text rounded-md outline-1 outline-dashed outline-[#F7931A]/40 hover:outline-[#F7931A] hover:bg-[#F7931A]/5 px-1 -mx-1 transition-colors'
+          ? 'cursor-text rounded-md outline-1 outline-dashed outline-[var(--candlie-pink-primary)]/40 hover:outline-[var(--candlie-pink-primary)] hover:bg-[var(--candlie-pink-primary)]/5 px-1 -mx-1 transition-colors'
           : '',
       ].join(' ')}
       contentEditable={editable}

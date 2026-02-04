@@ -26,7 +26,7 @@ export function DialogContent({ className, children, ...props }) {
   return (
     <div
       className={cn(
-        'mx-auto w-full max-w-lg rounded-2xl border border-white/10 bg-[#1a1a1a] p-6 shadow-2xl',
+        'mx-auto w-full max-w-lg rounded-2xl border border-black/10 bg-white p-6 shadow-2xl',
         className
       )}
       onClick={(e) => e.stopPropagation()}
@@ -36,7 +36,7 @@ export function DialogContent({ className, children, ...props }) {
         type="button"
         aria-label="Close"
         onClick={() => onOpenChange?.(false)}
-        className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
+        className="absolute right-4 top-4 rounded-lg p-2 text-black/40 hover:bg-black/5 hover:text-black"
       >
         ✕
       </button>

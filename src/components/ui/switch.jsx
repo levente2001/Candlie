@@ -10,13 +10,13 @@ export function Switch({ checked, onCheckedChange, className }) {
       onClick={() => onCheckedChange?.(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-        checked ? 'bg-[#F7931A]' : 'bg-white/10',
+        checked ? 'bg-[var(--candlie-pink-secondary)]' : 'bg-black/10',
         className
       )}
     >
       <span
         className={cn(
-          'inline-block h-5 w-5 transform rounded-full bg-black transition-transform',
+          'inline-block h-5 w-5 transform rounded-full bg-white transition-transform border border-black/10',
           checked ? 'translate-x-5' : 'translate-x-1'
         )}
       />

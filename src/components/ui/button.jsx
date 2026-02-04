@@ -2,9 +2,9 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const variants = {
-  default: 'bg-[#F7931A] text-black hover:bg-[#f5a623]',
-  outline: 'border border-white/10 bg-transparent hover:bg-white/5',
-  ghost: 'bg-transparent hover:bg-white/5',
+  default: 'bg-[var(--candlie-pink-secondary)] text-white hover:bg-[var(--candlie-pink-primary)]',
+  outline: 'border border-black/10 bg-white hover:bg-black/5',
+  ghost: 'bg-transparent hover:bg-black/5',
 };
 
 const sizes = {

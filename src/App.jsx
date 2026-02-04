@@ -5,7 +5,8 @@ import Layout from './Layout.jsx';
 import Home from './pages/Home.jsx';
 import Products from './pages/Products.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
-import About from './pages/About.jsx';
+import Candlie from './pages/Candlie.jsx';
+import Contact from './pages/Contact.jsx';
 import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
 
@@ -48,8 +49,24 @@ export default function App() {
       <Route
         path="/about"
         element={
-          <Layout currentPageName="About">
-            <About />
+          <Layout currentPageName="Candlie">
+            <Candlie />
+          </Layout>
+        }
+      />
+      <Route
+        path="/candlie"
+        element={
+          <Layout currentPageName="Candlie">
+            <Candlie />
+          </Layout>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <Layout currentPageName="Contact">
+            <Contact />
           </Layout>
         }
       />

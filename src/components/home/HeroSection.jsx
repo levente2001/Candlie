@@ -87,7 +87,7 @@ export default function HeroSection() {
 
                 <div className="relative">
                   <img
-                    src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg"
+                    src="../heroimg.avif"
                     alt="Crypto T-shirt"
                     className="w-full h-64 object-cover rounded-2xl mb-6"
                   />

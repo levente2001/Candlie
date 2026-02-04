@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 
 const categories = [
+  { id: 'none', name: 'None' },
   { id: 'limited', name: 'Limitált' },
 ];
 

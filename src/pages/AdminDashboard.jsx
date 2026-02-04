@@ -159,10 +159,13 @@ export default function AdminDashboard() {
     return acc;
   }, {});
 
-  const pieData = Object.entries(categoryData).map(([name, value]) => ({
-    name: name.charAt(0).toUpperCase() + name.slice(1),
+  const pieData = Object.entries(categoryData)
+  .filter(([name]) => String(name).trim().toLowerCase() !== "none")
+  .map(([name, value]) => ({
+    name: String(name).trim().charAt(0).toUpperCase() + String(name).trim().slice(1),
     value,
   }));
+
 
   // Order status distribution (within filter)
   const statusData = [

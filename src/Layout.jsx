@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,12 +8,17 @@ export default function Layout({ children, currentPageName }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cryptoCart') || '[]');
@@ -196,8 +201,16 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <h4 className="text-sm font-semibold text-black mb-4">Információk</h4>
               <ul className="space-y-2 text-sm text-black/60">
-                <li>ÁSZF</li>
-                <li>Adatkezelési tájékoztató</li>
+                <li>
+                  <Link to={createPageUrl('Aszf')} className="hover:text-[var(--candlie-pink-primary)] transition-colors">
+                    ÁSZF
+                  </Link>
+                </li>
+                <li>
+                  <Link to={createPageUrl('Privacy')} className="hover:text-[var(--candlie-pink-primary)] transition-colors">
+                    Adatkezelési tájékoztató
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

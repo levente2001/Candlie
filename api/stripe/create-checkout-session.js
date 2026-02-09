@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const stripe = new Stripe(key, { apiVersion: "2024-06-20" });
 
     const body = await readBodyJson(req);
-    const { orderId, items, customerEmail, shipping } = body || {};
+    const { orderId, items, customerEmail, shipping, discountAmount } = body || {};
 
     if (!orderId) return sendJson(res, 400, { error: "Missing orderId" });
     if (!Array.isArray(items) || items.length === 0) {
@@ -55,6 +55,24 @@ export default async function handler(req, res) {
         },
       };
     });
+
+    // Apply discount by reducing line item amounts (Stripe doesn't allow negative line items here)
+    let discountMinor = Math.max(0, Math.round(Number(discountAmount || 0) * 100));
+    if (discountMinor > 0) {
+      for (const li of line_items) {
+        if (discountMinor <= 0) break;
+        const qty = Math.max(1, Number(li.quantity || 1));
+        const unit = Math.max(0, Number(li.price_data?.unit_amount || 0));
+        const lineTotal = unit * qty;
+        if (lineTotal <= 0) continue;
+
+        const reduce = Math.min(lineTotal, discountMinor);
+        const newLineTotal = lineTotal - reduce;
+        const newUnit = Math.floor(newLineTotal / qty);
+        li.price_data.unit_amount = Math.max(0, newUnit);
+        discountMinor -= reduce;
+      }
+    }
 
     const shippingAmount = Math.max(0, toMinor(shipping?.amount)); 
     const shippingName = shipping?.name ? String(shipping.name) : "Szállítás";

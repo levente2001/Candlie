@@ -16,9 +16,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 function calcShippingAmount(method, subtotal) {
   if (!method) return 0;
   const price = Math.max(0, Math.round(Number(method.price ?? 0)));
-  const freeOver = method.free_over == null ? null : Math.max(0, Math.round(Number(method.free_over)));
-  if (freeOver != null && subtotal >= freeOver) return 0;
   return price;
+}
+
+function normalizeCode(value) {
+  return String(value || '').trim().toUpperCase();
 }
 
 export default function Checkout() {
@@ -33,6 +35,10 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [careAccepted, setCareAccepted] = useState(false);
   const [showCareModal, setShowCareModal] = useState(false);
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   // COD success UX
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -42,9 +48,59 @@ export default function Checkout() {
     name: '',
     email: '',
     phone: '',
-    address: '',
+    residential_zip: '',
+    residential_city: '',
+    residential_street: '',
+    residential_house: '',
+    shipping_zip: '',
+    shipping_city: '',
+    shipping_street: '',
+    shipping_house: '',
+    billing_zip: '',
+    billing_city: '',
+    billing_street: '',
+    billing_house: '',
     notes: '',
   });
+
+  const updateField = (key, value) => {
+    setFormData((prev) => {
+      const next = { ...prev, [key]: value };
+      if (billingSameAsShipping && key.startsWith('shipping_')) {
+        const suffix = key.replace('shipping_', '');
+        next[`billing_${suffix}`] = value;
+      }
+      return next;
+    });
+  };
+
+  const applyShippingToBilling = () => {
+    setFormData((prev) => ({
+      ...prev,
+      billing_zip: prev.shipping_zip,
+      billing_city: prev.shipping_city,
+      billing_street: prev.shipping_street,
+      billing_house: prev.shipping_house,
+    }));
+  };
+
+  const clearBilling = () => {
+    setFormData((prev) => ({
+      ...prev,
+      billing_zip: '',
+      billing_city: '',
+      billing_street: '',
+      billing_house: '',
+    }));
+  };
+
+  const formatAddress = (prefix, data) => {
+    const zip = data[`${prefix}_zip`]?.trim();
+    const city = data[`${prefix}_city`]?.trim();
+    const street = data[`${prefix}_street`]?.trim();
+    const house = data[`${prefix}_house`]?.trim();
+    return [zip, city, street, house].filter(Boolean).join(', ');
+  };
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cryptoCart') || '[]');
@@ -56,6 +112,11 @@ export default function Checkout() {
   const { data: shippingMethods = [], isLoading: shippingLoading } = useQuery({
     queryKey: ['shipping-methods'],
     queryFn: () => base44.entities.ShippingMethod.list('-created_date'),
+  });
+
+  const { data: coupons = [] } = useQuery({
+    queryKey: ['coupons'],
+    queryFn: () => base44.entities.Coupon.list('-created_date'),
   });
 
   const activeShipping = useMemo(() => {
@@ -74,9 +135,63 @@ export default function Checkout() {
 
   const shippingAmount = activeShipping.length
     ? calcShippingAmount(selectedShipping, subtotal)
-    : (subtotal > 15000 ? 0 : 1490);
+    : 1490;
 
-  const total = subtotal + shippingAmount;
+  const computeDiscount = (coupon, sub) => {
+    if (!coupon) return 0;
+    if (coupon.active === false) return 0;
+    if (coupon.min_subtotal != null && sub < Number(coupon.min_subtotal || 0)) return 0;
+    const value = Math.max(0, Number(coupon.value || 0));
+    if (coupon.type === 'percent') {
+      return Math.min(sub, Math.round((sub * value) / 100));
+    }
+    return Math.min(sub, Math.round(value));
+  };
+
+  const discountAmount = computeDiscount(appliedCoupon, subtotal);
+  const total = Math.max(0, subtotal - discountAmount + shippingAmount);
+
+  const applyCoupon = () => {
+    setCouponError('');
+    const code = normalizeCode(couponCode);
+    if (!code) return;
+    const found = coupons.find((c) => normalizeCode(c.code) === code);
+    if (!found) {
+      setAppliedCoupon(null);
+      setCouponError('Nincs ilyen kuponkód.');
+      return;
+    }
+    if (found.active === false) {
+      setAppliedCoupon(null);
+      setCouponError('Ez a kupon inaktív.');
+      return;
+    }
+    if (found.min_subtotal != null && subtotal < Number(found.min_subtotal || 0)) {
+      setAppliedCoupon(null);
+      setCouponError(`A kupon minimum kosárértéke ${(found.min_subtotal || 0).toLocaleString('hu-HU')} Ft.`);
+      return;
+    }
+    if (found.max_uses != null && Number(found.max_uses) <= 0) {
+      setAppliedCoupon(null);
+      setCouponError('A kupon elfogyott.');
+      return;
+    }
+    setAppliedCoupon(found);
+  };
+
+  const clearCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
+
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    if (appliedCoupon.min_subtotal != null && subtotal < Number(appliedCoupon.min_subtotal || 0)) {
+      setCouponError(`A kupon minimum kosárértéke ${(appliedCoupon.min_subtotal || 0).toLocaleString('hu-HU')} Ft.`);
+      setAppliedCoupon(null);
+    }
+  }, [appliedCoupon, subtotal]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,12 +206,26 @@ export default function Checkout() {
     try {
       const isCOD = paymentMethod === 'cod';
 
+      const shippingAddress = formatAddress('shipping', formData);
+      const residentialAddress = formatAddress('residential', formData);
+      const billingAddress = billingSameAsShipping
+        ? shippingAddress
+        : formatAddress('billing', formData);
+
       const orderData = {
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
-        shipping_address: formData.address,
+        shipping_address: shippingAddress,
+        residential_address: residentialAddress,
+        billing_address: billingAddress,
         notes: formData.notes,
+        coupon_code: appliedCoupon?.code || '',
+        coupon_name: appliedCoupon?.name || '',
+        coupon_type: appliedCoupon?.type || '',
+        coupon_value: appliedCoupon?.value ?? null,
+        coupon_campaign: appliedCoupon?.campaign || '',
+        coupon_discount: discountAmount,
 
         payment_method: isCOD ? 'cod' : 'stripe',
 
@@ -116,7 +245,7 @@ export default function Checkout() {
               description: selectedShipping.description || '',
               eta: selectedShipping.eta || '',
               price: Math.max(0, Math.round(Number(selectedShipping.price ?? 0))),
-              free_over: selectedShipping.free_over ?? null,
+              free_over: null,
               amount: shippingAmount,
             }
           : {
@@ -125,7 +254,7 @@ export default function Checkout() {
               description: '',
               eta: '',
               price: shippingAmount,
-              free_over: 15000,
+              free_over: null,
               amount: shippingAmount,
             },
 
@@ -163,6 +292,8 @@ export default function Checkout() {
             price: i.price,
           })),
           shipping: { name: (selectedShipping?.name || 'Szállítás'), amount: shippingAmount },
+          discountAmount,
+          couponCode: appliedCoupon?.code || '',
         }),
       });
 
@@ -274,7 +405,7 @@ export default function Checkout() {
                     id="name"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => updateField('name', e.target.value)}
                     className="mt-2 h-12 rounded-xl"
                     placeholder="Kovács János"
                   />
@@ -286,7 +417,7 @@ export default function Checkout() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => updateField('email', e.target.value)}
                     className="mt-2 h-12 rounded-xl"
                     placeholder="email@example.com"
                   />
@@ -297,9 +428,55 @@ export default function Checkout() {
                     id="phone"
                     required
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => updateField('phone', e.target.value)}
                     className="mt-2 h-12 rounded-xl"
                     placeholder="+36 30 123 4567"
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-4 gap-4 mt-6">
+                <div>
+                  <Label htmlFor="residential_zip" className="text-black/70">Lakcím irányítószám *</Label>
+                  <Input
+                    id="residential_zip"
+                    required
+                    value={formData.residential_zip}
+                    onChange={(e) => updateField('residential_zip', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="1234"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="residential_city" className="text-black/70">Lakcím város *</Label>
+                  <Input
+                    id="residential_city"
+                    required
+                    value={formData.residential_city}
+                    onChange={(e) => updateField('residential_city', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Budapest"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="residential_street" className="text-black/70">Lakcím utca *</Label>
+                  <Input
+                    id="residential_street"
+                    required
+                    value={formData.residential_street}
+                    onChange={(e) => updateField('residential_street', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Példa utca"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="residential_house" className="text-black/70">Lakcím házszám *</Label>
+                  <Input
+                    id="residential_house"
+                    required
+                    value={formData.residential_house}
+                    onChange={(e) => updateField('residential_house', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="12"
                   />
                 </div>
               </div>
@@ -337,25 +514,54 @@ export default function Checkout() {
 
                   {selectedShipping?.description && <p className="text-sm text-black/60 mt-2">{selectedShipping.description}</p>}
                   {selectedShipping?.eta && <p className="text-xs text-black/50 mt-1">ETA: {selectedShipping.eta}</p>}
-                  {selectedShipping?.free_over != null && subtotal < selectedShipping.free_over && (
-                    <p className="text-sm text-[var(--candlie-pink-secondary)] mt-2">
-                      Még {(selectedShipping.free_over - subtotal).toLocaleString('hu-HU')} Ft és ingyenes lesz a szállítás
-                    </p>
-                  )}
                 </div>
               )}
 
-              <div className="mt-6">
-                <Label htmlFor="address" className="text-black/70">Szállítási cím *</Label>
-                <Textarea
-                  id="address"
-                  required
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="mt-2 rounded-xl"
-                  placeholder="1234 Budapest, Példa utca 12."
-                  rows={3}
-                />
+              <div className="mt-6 grid md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="shipping_zip" className="text-black/70">Szállítási irányítószám *</Label>
+                  <Input
+                    id="shipping_zip"
+                    required
+                    value={formData.shipping_zip}
+                    onChange={(e) => updateField('shipping_zip', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="1234"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="shipping_city" className="text-black/70">Szállítási város *</Label>
+                  <Input
+                    id="shipping_city"
+                    required
+                    value={formData.shipping_city}
+                    onChange={(e) => updateField('shipping_city', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Budapest"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="shipping_street" className="text-black/70">Szállítási utca *</Label>
+                  <Input
+                    id="shipping_street"
+                    required
+                    value={formData.shipping_street}
+                    onChange={(e) => updateField('shipping_street', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Példa utca"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="shipping_house" className="text-black/70">Szállítási házszám *</Label>
+                  <Input
+                    id="shipping_house"
+                    required
+                    value={formData.shipping_house}
+                    onChange={(e) => updateField('shipping_house', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="12"
+                  />
+                </div>
               </div>
 
               <div className="mt-4">
@@ -363,11 +569,82 @@ export default function Checkout() {
                 <Textarea
                   id="notes"
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={(e) => updateField('notes', e.target.value)}
                   className="mt-2 rounded-xl"
                   placeholder="Pl.: csengőnél hívjon"
                   rows={2}
                 />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <h2 className="text-xl font-semibold">Számlázási cím</h2>
+                <label className="flex items-center gap-2 text-sm text-black/70">
+                  <input
+                    type="checkbox"
+                    checked={billingSameAsShipping}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setBillingSameAsShipping(checked);
+                      if (checked) applyShippingToBilling();
+                      else clearBilling();
+                    }}
+                    className="h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
+                  />
+                  Számlázási cím megegyezik a szállítási címmel
+                </label>
+              </div>
+
+              <div className="grid md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="billing_zip" className="text-black/70">Számlázási irányítószám *</Label>
+                  <Input
+                    id="billing_zip"
+                    required
+                    disabled={billingSameAsShipping}
+                    value={formData.billing_zip}
+                    onChange={(e) => updateField('billing_zip', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="1234"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="billing_city" className="text-black/70">Számlázási város *</Label>
+                  <Input
+                    id="billing_city"
+                    required
+                    disabled={billingSameAsShipping}
+                    value={formData.billing_city}
+                    onChange={(e) => updateField('billing_city', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Budapest"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_street" className="text-black/70">Számlázási utca *</Label>
+                  <Input
+                    id="billing_street"
+                    required
+                    disabled={billingSameAsShipping}
+                    value={formData.billing_street}
+                    onChange={(e) => updateField('billing_street', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="Példa utca"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="billing_house" className="text-black/70">Számlázási házszám *</Label>
+                  <Input
+                    id="billing_house"
+                    required
+                    disabled={billingSameAsShipping}
+                    value={formData.billing_house}
+                    onChange={(e) => updateField('billing_house', e.target.value)}
+                    className="mt-2 h-12 rounded-xl"
+                    placeholder="12"
+                  />
+                </div>
               </div>
             </div>
 
@@ -426,6 +703,47 @@ export default function Checkout() {
                   ? 'A gombra kattintva átirányítunk a Stripe biztonságos fizetési oldalára.'
                   : 'A rendelésed rögzítjük, a fizetés átvételkor történik. A rendelés státusza: pending.'}
               </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-black/10">
+              <h2 className="text-xl font-semibold mb-4">Kupon</h2>
+              <div className="flex flex-col md:flex-row gap-3">
+                <Input
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="h-12 rounded-xl"
+                  placeholder="Kuponkód"
+                />
+                <Button
+                  type="button"
+                  onClick={applyCoupon}
+                  className="h-12 bg-[var(--candlie-pink-secondary)] hover:bg-[var(--candlie-pink-primary)] text-white"
+                >
+                  Alkalmaz
+                </Button>
+                {appliedCoupon && (
+                  <Button type="button" variant="outline" onClick={clearCoupon} className="h-12 border-black/10">
+                    Törlés
+                  </Button>
+                )}
+              </div>
+              {appliedCoupon && (
+                <div className="mt-3 inline-flex items-center gap-2 text-sm">
+                  <span
+                    className="px-2.5 py-1 rounded-full text-white font-semibold"
+                    style={{ backgroundColor: appliedCoupon.color || '#735573' }}
+                  >
+                    {appliedCoupon.code}
+                  </span>
+                  <span className="text-black/60">
+                    {appliedCoupon.type === 'percent'
+                      ? `${appliedCoupon.value || 0}%`
+                      : `${(appliedCoupon.value || 0).toLocaleString('hu-HU')} Ft`}{' '}
+                    kedvezmény
+                  </span>
+                </div>
+              )}
+              {couponError && <p className="text-sm text-red-600 mt-2">{couponError}</p>}
             </div>
 
             <div className="bg-white rounded-2xl p-6 border border-black/10">
@@ -490,6 +808,13 @@ export default function Checkout() {
                   <span>Részösszeg</span>
                   <span>{subtotal.toLocaleString('hu-HU')} Ft</span>
                 </div>
+
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-700">
+                    <span>Kedvezmény</span>
+                    <span>-{discountAmount.toLocaleString('hu-HU')} Ft</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between text-black/60">
                   <span>Szállítás</span>

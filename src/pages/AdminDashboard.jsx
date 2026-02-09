@@ -44,6 +44,11 @@ export default function AdminDashboard() {
     queryFn: () => base44.entities.PageView.list('-created_date', 1000),
   });
 
+  const { data: coupons = [] } = useQuery({
+    queryKey: ['admin-coupons'],
+    queryFn: () => base44.entities.Coupon.list('-created_date'),
+  });
+
   // --- Date range helpers ---
   const from = fromDate ? startOfDay(parseISO(fromDate)) : null;
   const to = toDate ? endOfDay(parseISO(toDate)) : null;
@@ -160,9 +165,10 @@ export default function AdminDashboard() {
   }, {});
 
   const pieData = Object.entries(categoryData)
-  .filter(([name]) => String(name).trim().toLowerCase() !== "none")
   .map(([name, value]) => ({
-    name: String(name).trim().charAt(0).toUpperCase() + String(name).trim().slice(1),
+    name: String(name).trim().toLowerCase() === 'none'
+      ? 'Állandó'
+      : String(name).trim().charAt(0).toUpperCase() + String(name).trim().slice(1),
     value,
   }));
 
@@ -178,6 +184,28 @@ export default function AdminDashboard() {
 
   // Recent orders (within filter)
   const recentOrders = filteredOrders.slice(0, 5);
+
+  const couponUsage = filteredOrders.reduce((acc, o) => {
+    const code = String(o.coupon_code || '').trim().toUpperCase();
+    if (!code) return acc;
+    acc[code] = (acc[code] || 0) + 1;
+    return acc;
+  }, {});
+
+  const couponStats = Object.entries(couponUsage)
+    .map(([code, count]) => {
+      const c = coupons.find((cp) => String(cp.code || '').trim().toUpperCase() === code);
+      return {
+        code,
+        count,
+        name: c?.name || 'Ismeretlen kupon',
+        color: c?.color || '#735573',
+        type: c?.type || '',
+        value: c?.value ?? null,
+        campaign: c?.campaign || '',
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 
   return (
     <div className="min-h-screen bg-[var(--candlie-bg)] text-black">
@@ -509,6 +537,46 @@ export default function AdminDashboard() {
               </div>
             </motion.div>
           </div>
+
+          {/* Coupon Usage */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            className="bg-white rounded-2xl p-6 border border-black/10 mb-8"
+          >
+            <h3 className="text-lg font-semibold mb-6">Kupon beváltások</h3>
+            {couponStats.length === 0 ? (
+              <p className="text-sm text-black/60">Ebben az időszakban nincs kuponos rendelés.</p>
+            ) : (
+              <div className="space-y-4">
+                {couponStats.map((c) => (
+                  <div key={c.code} className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-white"
+                        style={{ backgroundColor: c.color }}
+                      >
+                        {c.code}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{c.name}</p>
+                        <p className="text-xs text-black/50">
+                          {c.type === 'percent'
+                            ? `${c.value || 0}%`
+                            : c.value != null
+                              ? `${Number(c.value).toLocaleString('hu-HU')} Ft`
+                              : ''}{' '}
+                          {c.campaign ? `• ${c.campaign}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm font-semibold">{c.count} db</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
 
           {/* Orders & Status Row */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

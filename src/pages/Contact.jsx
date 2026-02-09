@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { base44 } from '@/api/base44Client';
 
 const TikTokIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -23,7 +22,7 @@ const InstagramIcon = (props) => (
 export default function Contact() {
   const [questionOpen, setQuestionOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', question: '' });
+  const [form, setForm] = useState({ name: '', email: '', question: '' });
   const [status, setStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,12 +35,17 @@ export default function Contact() {
     }
     try {
       setIsSubmitting(true);
-      await base44.entities.Question.create({
-        email: form.email,
-        question: form.question.trim(),
-      });
-      setStatus('Köszönjük! Hamarosan jelentkezünk.');
-      setForm({ email: '', question: '' });
+      const subject = 'CANDLIE kérdés';
+      const bodyLines = [
+        form.name ? `Név: ${form.name}` : null,
+        `Email: ${form.email}`,
+        '',
+        form.question.trim(),
+      ].filter(Boolean);
+      const mailto = `mailto:hello@candlie.hu?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+      window.location.href = mailto;
+      setStatus('Köszönjük! Az email kliens megnyitásához elkészítettük az üzenetet.');
+      setForm({ name: '', email: '', question: '' });
     } catch (err) {
       setStatus(err?.message || 'Hiba történt a kérdés elküldésekor.');
     } finally {
@@ -107,8 +111,18 @@ export default function Contact() {
           </DialogHeader>
           <form onSubmit={submitQuestion} className="space-y-4">
             <div>
+              <label className="text-sm text-black/70">Teljes név (opcionális)</label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="mt-2"
+                placeholder="Kovács János"
+              />
+            </div>
+            <div>
               <label className="text-sm text-black/70">Email</label>
               <Input
+                type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="mt-2"
@@ -134,11 +148,72 @@ export default function Contact() {
       </Dialog>
 
       <Dialog open={returnOpen} onOpenChange={setReturnOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Visszaküldés</DialogTitle>
           </DialogHeader>
-          <p className="text-red-600">Még szerkesztés alatt van a szöveg</p>
+          <div style={{ fontFamily: 'Times New Roman, Times, serif', color: '#000000' }} className="space-y-4 text-sm leading-relaxed">
+            <p>„A visszaküldéssel és reklamációval kapcsolatos ügyintézés kizárólag írásban, e-mailben történik.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Elállási jog”</h3>
+            <p>
+              „A fogyasztót a termék kézhezvételétől számított 14 naptári napon belül indokolás nélküli elállási jog illeti meg.
+              Több termék egyidejű rendelése esetén az elállási jog a rendelés egyes termékeire külön-külön is gyakorolható.
+              Az elállási jog gyakorlásához a vásárlónak egyértelmű nyilatkozatot kell tennie az alábbi elérhetőségen:
+              E-mail cím: hello@candlie.hu
+              A vásárló az elállási jogát a jelen tájékoztató végén található elállási nyilatkozat-minta felhasználásával is gyakorolhatja.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Termék visszaküldés”</h3>
+            <p>
+              „Elállás esetén a vásárló köteles a terméket haladéktalanul, de legkésőbb az elállás közlésétől számított 14 napon belül visszaküldeni.
+              A visszaküldés közvetlen költsége a vásárlót terheli.
+              A terméket nem használt, sértetlen állapotban, lehetőség szerint az eredeti csomagolásban kérjük visszaküldeni.
+              A szolgáltató fenntartja a jogot, hogy visszaélésszerű elállás vagy ismétlődő indokolatlan visszaküldés esetén a további rendelések teljesítését megtagadja.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Át nem vett csomag”</h3>
+            <p>
+              „Amennyiben a vásárló a megrendelt csomagot nem veszi át, és az a szolgáltatóhoz visszaérkezik, az nem minősül az elállási jog gyakorlásának.
+              Ebben az esetben a szolgáltató jogosult a felmerült szállítási és kezelési költségeket a visszatérítendő összegből levonni, vagy – utánvétes rendelés esetén – a vásárlóval szemben érvényesíteni.
+              A vásárló a csomag újbóli kiküldését kizárólag a szállítási költségek előzetes megfizetését követően kérheti.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Visszatérítés”</h3>
+            <p>
+              „Az elállás elfogadását követően a szolgáltató a visszaküldött termék beérkezésétől számított, de legkésőbb az elállásról való tudomásszerzéstől számított 14 napon belül visszatéríti a termék vételárát.
+              A visszatérítés az eredeti fizetési móddal megegyező módon történik, kivéve, ha a felek ettől eltérően állapodnak meg. Utánvétes fizetés esetén a visszatérítés banki átutalással történik, a vásárló által megadott bankszámlaszámra.
+              Elállás esetén a szolgáltató a vásárló által megfizetett szállítási díjat legfeljebb a legolcsóbb szállítási mód díjáig téríti vissza; mivel ez a személyes átvétel, amely díjmentes, szállítási díj visszatérítésére nem kerül sor.
+              A szolgáltató jogosult a visszatérítést addig visszatartani, amíg a termék vissza nem érkezik.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Elállási jog alóli kivételek”</h3>
+            <p>
+              „A kézzel készült termékek jellegéből adódóan az egyes darabok között kisebb szín-, forma- vagy díszítésbeli eltérések előfordulhatnak, amelyek nem minősülnek hibának. Az illatérzet szubjektív, ezért az illat intenzitása vagy jellege miatti eltérés nem minősül hibás teljesítésnek. Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés – úgynevezett frosting – jelenik meg, ami a 100% szójaviaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja. Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának.
+              A fogyasztót nem illeti meg az elállási jog olyan termékek esetében, amelyek a vásárló egyedi kérésére, személyre szabottan készültek (például egyedi felirat, név, dátum, külön kért szín- vagy illatkombináció).
+              A vásárló által hibásan megadott szállítási adatokból eredő késedelemért vagy sikertelen kézbesítésért a szolgáltató nem vállal felelősséget.”</p>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Sérült termék esetén”</h3>
+            <div>
+              <p>
+                „Amennyiben a vásárló a csomag átvételekor vagy kibontásakor sérült terméket észlel (például törött, repedt gyertya),
+                kérjük, haladéktalanul, de legkésőbb 48 órán belül jelezze azt e-mailben az alábbi elérhetőségen:
+                E-mail: hello@candlie.hu
+                A bejelentéshez kérjük csatolni:
+              </p>
+              <ul className="list-disc pl-5">
+                <li>a sérült termékről készült fotókat</li>
+                <li>a csomagolásról készült fotót (ha látható rajta sérülés)</li>
+              </ul>
+              <p>
+                Szállítás közben megsérült termék esetén a visszaküldés költsége a szolgáltatót terheli, és a vásárló választása szerint:
+                csereterméket küldünk, vagy a teljes vételárat visszatérítjük.”
+              </p>
+            </div>
+
+            <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>„Elállási nyilatkozat-minta”</h3>
+            <p>
+              „Alulírott ……………………………………… kijelentem, hogy elállok a ……………………………………… termék(ek) adásvételére irányuló szerződéstől.
+              Rendelés száma: ……………………Átvétel dátuma: ……………………
+              Név: ………………………………………Cím: ………………………………………Dátum: ……………………
+              Aláírás (papíron történő nyilatkozat esetén)”</p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

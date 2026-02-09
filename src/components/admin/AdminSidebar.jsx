@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame, Tag } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/api/firebase';
 import { motion } from 'framer-motion';
 
 export default function AdminSidebar({ collapsed, setCollapsed }) {
@@ -13,6 +15,8 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { icon: ShoppingBag, label: 'Rendelések', page: 'AdminOrders' },
     { icon: Truck, label: 'Kiszállítás', page: 'AdminShipping' },
     { icon: Pencil, label: 'Szerkesztés', page: 'AdminContentEditor' },
+    { icon: Settings, label: 'ÁSZF & Adatkezelés', page: 'AdminLegal' },
+    { icon: Tag, label: 'Kuponok', page: 'AdminCoupons' },
   ];
 
   const isActive = (page) => location.pathname.includes(page.toLowerCase().replace('admin', ''));
@@ -75,13 +79,17 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
 
       {/* Footer */}
       <div className="p-4 border-t border-black/10">
-        <Link
-          to={createPageUrl('Home')}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-black/60 hover:text-black hover:bg-black/5 transition-all"
+        <button
+          type="button"
+          onClick={async () => {
+            await signOut(auth);
+            window.location.assign(createPageUrl('Home'));
+          }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-black/60 hover:text-black hover:bg-black/5 transition-all"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
-          {!collapsed && <span className="font-medium">Kilépés</span>}
-        </Link>
+          {!collapsed && <span className="font-medium">Kijelentkezés</span>}
+        </button>
       </div>
     </motion.aside>
   );

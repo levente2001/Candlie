@@ -126,7 +126,7 @@ export default function HeroSection() {
                 className="absolute -top-6 -right-6 bg-white rounded-2xl p-4 border border-black/10 shadow-xl"
               >
                 <div className="text-center">
-                  <p className="text-[var(--candlie-pink-secondary)] font-bold text-lg">🔥</p>
+                  <p className="text-[var(--candlie-pink-secondary)] font-bold text-lg">🍸</p>
                   <p className="text-black font-semibold text-sm">
                     <EditableText contentKey="home.hero.float_1" defaultValue="Új illatok" />
                   </p>

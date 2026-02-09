@@ -157,11 +157,6 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  {total < 15000 && (
-                    <p className="text-sm text-[var(--candlie-pink-secondary)]">
-                      Még {(15000 - total).toLocaleString('hu-HU')} Ft és ingyenes a szállítás!
-                    </p>
-                  )}
                 </div>
 
                 <Link to={createPageUrl('Checkout')}>

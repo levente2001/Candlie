@@ -7,6 +7,8 @@ const pageMap = {
   Contact: '/contact',
   Cart: '/cart',
   Checkout: '/checkout',
+  Aszf: '/aszf',
+  Privacy: '/adatkezeles',
 
   AdminDashboard: '/admin',
   AdminProducts: '/admin/products',
@@ -14,6 +16,8 @@ const pageMap = {
   AdminShipping: '/admin/shipping',
   CheckoutSuccess: '/checkout/success',
   AdminContentEditor: '/admin/content',
+  AdminLegal: '/admin/legal',
+  AdminCoupons: '/admin/coupons',
 };
 
 export function createPageUrl(page) {

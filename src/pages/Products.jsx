@@ -12,6 +12,7 @@ import EditableText from '@/components/editable/EditableText';
 
 const categories = [
   { id: 'all', name: 'Összes' },
+  { id: 'none', name: 'Állandó' },
   { id: 'limited', name: 'Limitált' },
 ];
 

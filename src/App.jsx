@@ -14,9 +14,15 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProducts from './pages/AdminProducts.jsx';
 import AdminOrders from './pages/AdminOrders.jsx';
 import AdminShipping from './pages/AdminShipping.jsx';
+import AdminLegal from './pages/AdminLegal.jsx';
+import AdminCoupons from './pages/AdminCoupons.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
+import AdminAuthGuard from './components/admin/AdminAuthGuard.jsx';
 
 import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
 import AdminContentEditor from './pages/AdminContentEditor.jsx';
+import Aszf from './pages/Aszf.jsx';
+import Privacy from './pages/Privacy.jsx';
 
 
 export default function App() {
@@ -71,6 +77,22 @@ export default function App() {
         }
       />
       <Route
+        path="/aszf"
+        element={
+          <Layout currentPageName="ASZF">
+            <Aszf />
+          </Layout>
+        }
+      />
+      <Route
+        path="/adatkezeles"
+        element={
+          <Layout currentPageName="Privacy">
+            <Privacy />
+          </Layout>
+        }
+      />
+      <Route
         path="/cart"
         element={
           <Layout currentPageName="Cart">
@@ -101,43 +123,74 @@ export default function App() {
       <Route
         path="/admin"
         element={
-          <Layout currentPageName="AdminDashboard">
-            <AdminDashboard />
-          </Layout>
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminDashboard">
+              <AdminDashboard />
+            </Layout>
+          </AdminAuthGuard>
         }
       />
       <Route
         path="/admin/products"
         element={
-          <Layout currentPageName="AdminProducts">
-            <AdminProducts />
-          </Layout>
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminProducts">
+              <AdminProducts />
+            </Layout>
+          </AdminAuthGuard>
         }
       />
       <Route
         path="/admin/orders"
         element={
-          <Layout currentPageName="AdminOrders">
-            <AdminOrders />
-          </Layout>
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminOrders">
+              <AdminOrders />
+            </Layout>
+          </AdminAuthGuard>
         }
       />
       <Route
         path="/admin/shipping"
         element={
-          <Layout currentPageName="AdminShipping">
-            <AdminShipping />
-          </Layout>
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminShipping">
+              <AdminShipping />
+            </Layout>
+          </AdminAuthGuard>
         }
       />
       <Route
         path="/admin/content"
         element={
-          <Layout currentPageName="AdminContentEditor">
-            <AdminContentEditor />
-          </Layout>
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminContentEditor">
+              <AdminContentEditor />
+            </Layout>
+          </AdminAuthGuard>
         }
       />
+      <Route
+        path="/admin/legal"
+        element={
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminLegal">
+              <AdminLegal />
+            </Layout>
+          </AdminAuthGuard>
+        }
+      />
+      <Route
+        path="/admin/coupons"
+        element={
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminCoupons">
+              <AdminCoupons />
+            </Layout>
+          </AdminAuthGuard>
+        }
+      />
+      <Route path="/admin/login" element={<AdminLogin />} />
 
 
       <Route path="*" element={<Navigate to="/" replace />} />

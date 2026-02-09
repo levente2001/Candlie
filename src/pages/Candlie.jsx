@@ -9,33 +9,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { base44 } from '@/api/base44Client';
 import TrackPageView from '../components/TrackPageView';
 
-const highlightCards = [
+const feedbackPreviews = [
   {
-    title: 'Szeretettel öntve',
-    description:
-      'Minden termékünk kézzel készül, egyedi illatvilággal, maximális odafigyeléssel kiöntve.',
+    name: 'Kiss Petra',
+    date: '2025.11.12.',
+    message: 'Gyönyörűen néz ki és az illata is pontosan olyan, mint a kedvenc koktélom. Szuper ajándék lett!',
   },
   {
-    title: 'Prémium minőség',
-    description:
-      'Kizárólag minőségi, 100% szója­viaszt használunk, amely káros anyagoktól mentes és hosszabb, tisztább égést biztosít.',
+    name: 'Nagy Ádám',
+    date: '2025.10.28.',
+    message: 'Tökéletes csomagolásban érkezett, a viasz égése egyenletes, és imádom a hangulatot, amit ad.',
   },
   {
-    title: 'Újrahasznosítható pohár',
-    description:
-      'Ha elégetted illatgyertyád, hasznosítsd újra a poharat, hogy kedvenc koktélod ne csak gyertya, de ital formában is megcsodálhasd.',
-  },
-  {
-    title: 'Vásárló barát',
-    description:
-      'Kedvező árak, részletes tájékoztatás és gyors szállítás mellett mindig rendelkezésre állunk kérdés esetén.',
+    name: 'Sipos Dóra',
+    date: '2025.09.06.',
+    message: 'Különleges, igényes, és az egész lakást belengi az illat. Biztosan rendelek még.',
   },
 ];
 
 export default function Candlie() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({ email: '', message: '' });
+  const [form, setForm] = useState({ name: '', message: '' });
   const [status, setStatus] = useState('');
 
   const wordCount = useMemo(() => {
@@ -51,12 +46,12 @@ export default function Candlie() {
     try {
       setIsSubmitting(true);
       await base44.entities.Feedback.create({
-        email: form.email || '',
+        name: form.name || '',
         message: form.message.trim(),
         word_count: wordCount,
       });
       setStatus('Köszönjük! A visszajelzésedet megkaptuk.');
-      setForm({ email: '', message: '' });
+      setForm({ name: '', message: '' });
     } catch (err) {
       setStatus(err?.message || 'Hiba történt a visszajelzés küldésekor.');
     } finally {
@@ -74,8 +69,8 @@ export default function Candlie() {
           className="mb-12"
         >
           <h1 className="text-3xl md:text-4xl font-semibold mb-4">
-            “Üdvözöllek a{' '}
-            <span className="text-[var(--candlie-pink-secondary)]">koktélgyertyák</span> világában!”
+            Üdvözöllek a{' '}
+            <span className="text-[var(--candlie-pink-secondary)]">koktélgyertyák</span> világában!
           </h1>
           <div className="space-y-5 text-black/70 leading-relaxed">
             <p>
@@ -106,10 +101,13 @@ export default function Candlie() {
         <section className="mt-16">
           <h2 className="text-2xl font-semibold mb-6">Visszajelzések</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {highlightCards.map((card) => (
-              <div key={card.title} className="bg-white border border-black/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-                <p className="text-sm text-black/70">{card.description}</p>
+            {feedbackPreviews.map((item) => (
+              <div key={`${item.name}-${item.date}`} className="bg-white border border-black/10 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">{item.name}</h3>
+                  <span className="text-xs text-black/50">{item.date}</span>
+                </div>
+                <p className="text-sm text-black/70">{item.message}</p>
               </div>
             ))}
           </div>
@@ -129,13 +127,12 @@ export default function Candlie() {
           </DialogHeader>
           <form onSubmit={submitFeedback} className="space-y-4">
             <div>
-              <label className="text-sm text-black/70">Email (opcionális)</label>
+              <label className="text-sm text-black/70">Teljes név (opcionális)</label>
               <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="mt-2"
-                placeholder="email@example.com"
+                placeholder="Kovács János"
               />
             </div>
             <div>

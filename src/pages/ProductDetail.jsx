@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,7 @@ export default function ProductDetail() {
 
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', productId],
@@ -32,6 +33,16 @@ export default function ProductDetail() {
     }, '-created_date', 4),
     enabled: !!product?.category,
   });
+
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    const base = [product.image_url, ...(Array.isArray(product.gallery_images) ? product.gallery_images : [])];
+    return base.filter(Boolean);
+  }, [product]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [product?.id]);
 
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem('cryptoCart') || '[]');
@@ -87,6 +98,8 @@ export default function ProductDetail() {
     );
   }
 
+  const activeImage = galleryImages[activeImageIndex] || product.image_url;
+
   const filteredRelated = relatedProducts.filter(p => p.id !== product.id).slice(0, 3);
 
   return (
@@ -120,11 +133,45 @@ export default function ProductDetail() {
                 </div>
               )}
               <img
-                src={product.image_url}
+                src={activeImage}
                 alt={product.name}
                 className="w-full aspect-square object-cover"
               />
+              {galleryImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 border border-black/10 flex items-center justify-center hover:bg-white"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImageIndex((prev) => (prev + 1) % galleryImages.length)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 border border-black/10 flex items-center justify-center hover:bg-white"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
             </div>
+            {galleryImages.length > 1 && (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+                {galleryImages.map((img, idx) => (
+                  <button
+                    key={`${img}-${idx}`}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`w-20 h-20 rounded-xl border overflow-hidden flex-shrink-0 ${
+                      idx === activeImageIndex ? 'border-[var(--candlie-pink-primary)]' : 'border-black/10'
+                    }`}
+                  >
+                    <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Product Info */}
@@ -134,7 +181,7 @@ export default function ProductDetail() {
             className="flex flex-col"
           >
             <div className="text-sm text-[var(--candlie-pink-secondary)] font-medium mb-2 uppercase tracking-wide">
-              {product.category?.replace('_', ' ')}
+              {product.category === 'none' ? 'Állandó' : product.category?.replace('_', ' ')}
             </div>
             <h1 className="text-3xl md:text-4xl font-semibold text-black mb-4">
               {product.name}
@@ -151,7 +198,7 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <p className="text-black/70 leading-relaxed mb-8">
+            <p className="text-black/70 leading-relaxed mb-8 whitespace-pre-line">
               {product.description || 'Prémium minőségű, kézzel készített koktélgyertya, amely különleges illatával és hangulatával emeli a pillanatot.'}
             </p>
 

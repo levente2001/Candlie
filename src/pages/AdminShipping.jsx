@@ -54,7 +54,6 @@ export default function AdminShipping() {
     name: "",
     description: "",
     price: "1490",
-    free_over: "15000",
     sort_order: "10",
     active: true,
     eta: "1-2 munkanap",
@@ -66,7 +65,6 @@ export default function AdminShipping() {
         name: m.name || "",
         description: m.description || "",
         price: (m.price ?? 0).toString(),
-        free_over: m.free_over != null ? String(m.free_over) : "",
         sort_order: m.sort_order != null ? String(m.sort_order) : "10",
         active: m.active !== false,
         eta: m.eta || "",
@@ -77,7 +75,6 @@ export default function AdminShipping() {
         name: "",
         description: "",
         price: "1490",
-        free_over: "15000",
         sort_order: "10",
         active: true,
         eta: "1-2 munkanap",
@@ -95,7 +92,6 @@ export default function AdminShipping() {
       eta: form.eta.trim(),
       active: !!form.active,
       price: Math.max(0, Math.round(Number(form.price || 0))),
-      free_over: form.free_over === "" ? null : Math.max(0, Math.round(Number(form.free_over || 0))),
       sort_order: form.sort_order === "" ? null : Math.round(Number(form.sort_order || 0)),
     };
 
@@ -159,15 +155,6 @@ export default function AdminShipping() {
                         {m.description && <p className="text-sm text-black/60 mt-1">{m.description}</p>}
                         <p className="text-sm text-black/60 mt-2">
                           Díj: <span className="text-black">{(m.price ?? 0).toLocaleString("hu-HU")} Ft</span>
-                          {m.free_over != null && (
-                            <>
-                              {" "}
-                              • Ingyenes{" "}
-                              <span className="text-black">
-                                {(m.free_over ?? 0).toLocaleString("hu-HU")} Ft felett
-                              </span>
-                            </>
-                          )}
                         </p>
                         {m.eta && <p className="text-xs text-black/50 mt-1">ETA: {m.eta}</p>}
                         <p className="text-xs text-black/50 mt-1">Sort: {m.sort_order ?? "—"}</p>
@@ -236,16 +223,6 @@ export default function AdminShipping() {
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                   className="mt-2 h-12 rounded-xl"
-                  inputMode="numeric"
-                />
-              </div>
-              <div>
-                <Label className="text-black/70">Ingyenes felett (Ft)</Label>
-                <Input
-                  value={form.free_over}
-                  onChange={(e) => setForm({ ...form, free_over: e.target.value })}
-                  className="mt-2 h-12 rounded-xl"
-                  placeholder="üres = nincs"
                   inputMode="numeric"
                 />
               </div>

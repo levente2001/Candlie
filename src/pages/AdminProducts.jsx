@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 
 const categories = [
-  { id: 'none', name: 'None' },
+  { id: 'none', name: 'Állandó' },
   { id: 'limited', name: 'Limitált' },
 ];
 
@@ -35,6 +35,7 @@ export default function AdminProducts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [galleryInput, setGalleryInput] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -75,7 +76,8 @@ export default function AdminProducts() {
     original_price: '',
     image_url: '',
     hover_image_url: '',
-    category: 'bitcoin',
+    gallery_images: [],
+    category: 'none',
     badge: '',
     stock: '',
     is_active: true,
@@ -90,7 +92,8 @@ export default function AdminProducts() {
         original_price: product.original_price?.toString() || '',
         image_url: product.image_url || '',
         hover_image_url: product.hover_image_url || '',
-        category: product.category || 'bitcoin',
+        gallery_images: Array.isArray(product.gallery_images) ? product.gallery_images : [],
+        category: product.category || 'none',
         badge: product.badge || '',
         stock: product.stock?.toString() || '',
         is_active: product.is_active !== false,
@@ -104,7 +107,8 @@ export default function AdminProducts() {
         original_price: '',
         image_url: '',
         hover_image_url: '',
-        category: 'bitcoin',
+        gallery_images: [],
+        category: 'none',
         badge: '',
         stock: '',
         is_active: true,
@@ -138,6 +142,43 @@ export default function AdminProducts() {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setFormData({ ...formData, [field]: file_url });
     setIsUploading(false);
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setIsUploading(true);
+    try {
+      const uploads = await Promise.all(
+        files.map(async (file) => {
+          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+          return file_url;
+        })
+      );
+      setFormData((prev) => ({
+        ...prev,
+        gallery_images: [...(prev.gallery_images || []), ...uploads],
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const addGalleryUrl = () => {
+    const value = galleryInput.trim();
+    if (!value) return;
+    setFormData((prev) => ({
+      ...prev,
+      gallery_images: [...(prev.gallery_images || []), value],
+    }));
+    setGalleryInput('');
+  };
+
+  const removeGalleryImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      gallery_images: (prev.gallery_images || []).filter((_, i) => i !== index),
+    }));
   };
 
   const filteredProducts = products.filter(p => 
@@ -411,6 +452,44 @@ export default function AdminProducts() {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'hover_image_url')} />
                     </label>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>Galéria képek (opcionális)</Label>
+              <div className="mt-2 space-y-3">
+                {(formData.gallery_images || []).length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {formData.gallery_images.map((img, idx) => (
+                      <div key={`${img}-${idx}`} className="relative">
+                        <img src={img} alt={`Galéria ${idx + 1}`} className="w-full h-24 object-cover rounded-lg border border-black/10" />
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(idx)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Input
+                    value={galleryInput}
+                    onChange={(e) => setGalleryInput(e.target.value)}
+                    className="flex-1"
+                    placeholder="Galéria kép URL"
+                  />
+                  <Button type="button" variant="outline" onClick={addGalleryUrl} className="border-black/10">
+                    Hozzáadás
+                  </Button>
+                  <label className="flex items-center justify-center w-12 h-10 bg-black/5 rounded-lg cursor-pointer hover:bg-black/10 transition-colors border border-black/10">
+                    <ImagePlus className="w-5 h-5 text-black/50" />
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
+                  </label>
                 </div>
               </div>
             </div>

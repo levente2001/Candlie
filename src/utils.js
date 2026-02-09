@@ -16,6 +16,7 @@ const pageMap = {
   AdminShipping: '/admin/shipping',
   CheckoutSuccess: '/checkout/success',
   AdminContentEditor: '/admin/content',
+  AdminFeedbacks: '/admin/feedbacks',
   AdminLegal: '/admin/legal',
   AdminCoupons: '/admin/coupons',
 };

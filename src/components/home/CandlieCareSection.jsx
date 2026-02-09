@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import EditableText from '../editable/EditableText';
 
 const icons = [
   (props) => (
@@ -57,14 +58,14 @@ const icons = [
 ];
 
 const items = [
-  'Ne égesd 4 óránál tovább a gyertyád egy huzamban!',
-  'Mindig vágd vissza a kanóc végét a gyertya meggyújtása előtt 0,5 cm-re a tökéletes és tiszta égés érdekében!',
-  'Hagyd, hogy a gyertyád széle is megolvadjon, hogy elkerüld az üregesedést!',
-  'Gyerekek és kisállatok elől távol tartandó!',
-  'Ne tedd ki a gyertyát közvetlen hőforrásnak!',
-  'A gyertyát stabil, egyenes helyen égesd, bármilyen gyúlékony tárgytól távol tartva!',
-  'Soha ne hagyd a gyertyát felügyelet nélkül!',
-  'A gyertya fogyasztásra nem alkalmas, kizárólag dekoráció!',
+  { key: 'care.items.1', text: 'Ne égesd 4 óránál tovább a gyertyád egy huzamban!' },
+  { key: 'care.items.2', text: 'Mindig vágd vissza a kanóc végét a gyertya meggyújtása előtt 0,5 cm-re a tökéletes és tiszta égés érdekében!' },
+  { key: 'care.items.3', text: 'Hagyd, hogy a gyertyád széle is megolvadjon, hogy elkerüld az üregesedést!' },
+  { key: 'care.items.4', text: 'Gyerekek és kisállatok elől távol tartandó!' },
+  { key: 'care.items.5', text: 'Ne tedd ki a gyertyát közvetlen hőforrásnak!' },
+  { key: 'care.items.6', text: 'A gyertyát stabil, egyenes helyen égesd, bármilyen gyúlékony tárgytól távol tartva!' },
+  { key: 'care.items.7', text: 'Soha ne hagyd a gyertyát felügyelet nélkül!' },
+  { key: 'care.items.8', text: 'A gyertya fogyasztásra nem alkalmas, kizárólag dekoráció!' },
 ];
 
 export default function CandlieCareSection() {
@@ -78,35 +79,47 @@ export default function CandlieCareSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold">
-            <span className="text-[var(--candlie-pink-primary)]">CANDLIE</span> Care – Gyertyakezelés és biztonsági útmutató
+            <span className="text-[var(--candlie-pink-primary)]">
+              <EditableText as="span" contentKey="care.heading.brand" defaultValue="CANDLIE" />
+            </span>{' '}
+            <EditableText
+              as="span"
+              contentKey="care.heading.title"
+              defaultValue="Care – Gyertyakezelés és biztonsági útmutató"
+            />
           </h2>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {items.map((text, index) => {
+          {items.map((item, index) => {
             const Icon = icons[index];
             return (
-              <div key={text} className="bg-white border border-black/10 rounded-2xl p-6">
+              <div key={item.key} className="bg-white border border-black/10 rounded-2xl p-6">
                 <div className="w-10 h-10 rounded-xl bg-[var(--candlie-pink-primary)]/10 text-[var(--candlie-pink-primary)] flex items-center justify-center mb-4">
                   <Icon className="w-6 h-6" />
                 </div>
-                <p className="text-sm text-black/80">{text}</p>
+                <EditableText
+                  as="p"
+                  className="text-sm text-black/80"
+                  contentKey={item.key}
+                  defaultValue={item.text}
+                />
               </div>
             );
           })}
         </div>
 
         <div className="mt-10 space-y-4 text-sm text-black/70">
-          <p>
-            Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés – úgynevezett frosting –
-            jelenik meg, ami a 100% szója­viaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja.
-            Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának!
-          </p>
-          <p>
-            A megrendelés leadásával a vásárló igazolja, hogy elolvasta és megismerte a fenti tájékoztatót,
-            valamint a termékek használata során betartja azokban foglalt biztonsági előírásokat.
-            A CANDLIE nem vállal felelősséget az előírások be nem tartásából eredő károkért vagy sérülésekért.
-          </p>
+          <EditableText
+            as="p"
+            contentKey="care.notes.1"
+            defaultValue="Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés – úgynevezett frosting – jelenik meg, ami a 100% szója­viaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja. Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának!"
+          />
+          <EditableText
+            as="p"
+            contentKey="care.notes.2"
+            defaultValue="A megrendelés leadásával a vásárló igazolja, hogy elolvasta és megismerte a fenti tájékoztatót, valamint a termékek használata során betartja azokban foglalt biztonsági előírásokat. A CANDLIE nem vállal felelősséget az előírások be nem tartásából eredő károkért vagy sérülésekért."
+          />
         </div>
       </div>
     </section>

@@ -18,6 +18,7 @@ import AdminLegal from './pages/AdminLegal.jsx';
 import AdminCoupons from './pages/AdminCoupons.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminAuthGuard from './components/admin/AdminAuthGuard.jsx';
+import AdminFeedbacks from './pages/AdminFeedbacks.jsx';
 
 import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
 import AdminContentEditor from './pages/AdminContentEditor.jsx';
@@ -166,6 +167,16 @@ export default function App() {
           <AdminAuthGuard>
             <Layout currentPageName="AdminContentEditor">
               <AdminContentEditor />
+            </Layout>
+          </AdminAuthGuard>
+        }
+      />
+      <Route
+        path="/admin/feedbacks"
+        element={
+          <AdminAuthGuard>
+            <Layout currentPageName="AdminFeedbacks">
+              <AdminFeedbacks />
             </Layout>
           </AdminAuthGuard>
         }

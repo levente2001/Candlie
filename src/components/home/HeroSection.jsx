@@ -97,7 +97,9 @@ export default function HeroSection() {
                       <EditableText contentKey="home.hero.card_title" defaultValue="CANDLIE" />
                     </h3>
                     <div className="px-3 py-1 bg-[var(--candlie-pink-secondary)]/15 rounded-full">
-                      <span className="text-[var(--candlie-pink-secondary)] text-sm font-semibold">HOT</span>
+                      <span className="text-[var(--candlie-pink-secondary)] text-sm font-semibold">
+                        <EditableText contentKey="home.hero.card_badge" defaultValue="HOT" />
+                      </span>
                     </div>
                   </div>
 

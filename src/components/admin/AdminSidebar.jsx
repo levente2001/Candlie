@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame, Tag } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame, Tag, MessageSquare } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/api/firebase';
 import { motion } from 'framer-motion';
@@ -15,6 +15,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { icon: ShoppingBag, label: 'Rendelések', page: 'AdminOrders' },
     { icon: Truck, label: 'Kiszállítás', page: 'AdminShipping' },
     { icon: Pencil, label: 'Szerkesztés', page: 'AdminContentEditor' },
+    { icon: MessageSquare, label: 'Visszajelzések', page: 'AdminFeedbacks' },
     { icon: Settings, label: 'ÁSZF & Adatkezelés', page: 'AdminLegal' },
     { icon: Tag, label: 'Kuponok', page: 'AdminCoupons' },
   ];

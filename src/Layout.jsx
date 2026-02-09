@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import EditableText from './components/editable/EditableText';
 
 export default function Layout({ children, currentPageName }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -100,7 +101,11 @@ export default function Layout({ children, currentPageName }) {
                     currentPageName === link.page ? 'text-[var(--candlie-pink-primary)]' : 'text-black/70'
                   }`}
                 >
-                  {link.name}
+                  <EditableText
+                    as="span"
+                    contentKey={`nav.${link.page.toLowerCase()}`}
+                    defaultValue={link.name}
+                  />
                   {currentPageName === link.page && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -157,7 +162,11 @@ export default function Layout({ children, currentPageName }) {
                       currentPageName === link.page ? 'text-[var(--candlie-pink-primary)]' : 'text-black/70'
                     }`}
                   >
-                    {link.name}
+                    <EditableText
+                      as="span"
+                      contentKey={`nav.${link.page.toLowerCase()}`}
+                      defaultValue={link.name}
+                    />
                   </Link>
                 ))}
               </div>
@@ -180,11 +189,17 @@ export default function Layout({ children, currentPageName }) {
                 </span>
               </div>
               <p className="text-black/70 max-w-md">
-                A kedvenc italod, gyertya formában!
+                <EditableText
+                  as="span"
+                  contentKey="footer.tagline"
+                  defaultValue="A kedvenc italod, gyertya formában!"
+                />
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-black mb-4">Navigáció</h4>
+              <h4 className="text-sm font-semibold text-black mb-4">
+                <EditableText as="span" contentKey="footer.nav_title" defaultValue="Navigáció" />
+              </h4>
               <ul className="space-y-2">
                 {navLinks.map((link) => (
                   <li key={link.page}>
@@ -192,23 +207,29 @@ export default function Layout({ children, currentPageName }) {
                       to={createPageUrl(link.page)}
                       className="text-black/60 hover:text-[var(--candlie-pink-primary)] transition-colors text-sm"
                     >
-                      {link.name}
+                      <EditableText
+                        as="span"
+                        contentKey={`footer.nav.${link.page.toLowerCase()}`}
+                        defaultValue={link.name}
+                      />
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-black mb-4">Információk</h4>
+              <h4 className="text-sm font-semibold text-black mb-4">
+                <EditableText as="span" contentKey="footer.info_title" defaultValue="Információk" />
+              </h4>
               <ul className="space-y-2 text-sm text-black/60">
                 <li>
                   <Link to={createPageUrl('Aszf')} className="hover:text-[var(--candlie-pink-primary)] transition-colors">
-                    ÁSZF
+                    <EditableText as="span" contentKey="footer.aszf" defaultValue="ÁSZF" />
                   </Link>
                 </li>
                 <li>
                   <Link to={createPageUrl('Privacy')} className="hover:text-[var(--candlie-pink-primary)] transition-colors">
-                    Adatkezelési tájékoztató
+                    <EditableText as="span" contentKey="footer.privacy" defaultValue="Adatkezelési tájékoztató" />
                   </Link>
                 </li>
               </ul>

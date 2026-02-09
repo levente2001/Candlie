@@ -33,7 +33,6 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-[var(--candlie-bg)] text-black flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white border border-black/10 rounded-2xl p-6">
         <h1 className="text-2xl font-semibold mb-2">Admin bejelentkezés</h1>
-        <p className="text-sm text-black/60 mb-6">Firebase email + jelszó.</p>
 
         <form onSubmit={submit} className="space-y-4">
           <Input

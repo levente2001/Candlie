@@ -49,7 +49,7 @@ export default function Contact() {
         '',
         form.question.trim(),
       ].filter(Boolean);
-      const mailto = `mailto:hello@candlie.hu?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+      const mailto = `mailto:candliegyertya@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
       window.location.href = mailto;
       setStatus('Köszönjük! Az email kliens megnyitásához elkészítettük az üzenetet.');
       setForm({ name: '', email: '', question: '' });
@@ -75,7 +75,7 @@ export default function Contact() {
                 <EditableText as="span" contentKey="contact.email_label" defaultValue="Email:" />
               </span>{' '}
               <span className="text-[var(--candlie-pink-secondary)]">
-                <EditableText as="span" contentKey="contact.email_value" defaultValue="hello@candlie.hu" />
+                <EditableText as="span" contentKey="contact.email_value" defaultValue="candliegyertya@gmail.com" />
               </span>
             </div>
             <div>

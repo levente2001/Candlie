@@ -4,6 +4,7 @@ import { createPageUrl } from '../../utils';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EditableText from '@/components/editable/EditableText';
+import heroImage from '../../../em_edited.jpg';
 
 export default function HeroSection() {
   return (
@@ -87,7 +88,7 @@ export default function HeroSection() {
 
                 <div className="relative">
                   <img
-                    src="https://img.freepik.com/free-photo/cozy-winter-composition-with-candles-blurred-background-with-books_169016-45127.jpg?t=st=1770233202~exp=1770236802~hmac=251b59380919b2c0c219e87cd25936a77c10d5a2d95d46177a71c20e8c29df3a"
+                    src={heroImage}
                     alt="Crypto T-shirt"
                     className="w-full h-64 object-cover rounded-2xl mb-6"
                   />

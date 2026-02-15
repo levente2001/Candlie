@@ -20,6 +20,12 @@ const InstagramIcon = (props) => (
   </svg>
 );
 
+const FacebookIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.88 3.78-3.88 1.1 0 2.25.2 2.25.2v2.46H15.2c-1.25 0-1.64.78-1.64 1.58V12h2.8l-.45 2.9h-2.35v6.99A10 10 0 0 0 22 12z" />
+  </svg>
+);
+
 export default function Contact() {
   const [questionOpen, setQuestionOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
@@ -99,6 +105,14 @@ export default function Contact() {
             >
               <InstagramIcon className="w-5 h-5" />
             </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=61587490810995"
+              target="_blank"
+              rel="noreferrer"
+              className="w-10 h-10 rounded-xl bg-[var(--candlie-pink-secondary)]/10 text-[var(--candlie-pink-secondary)] flex items-center justify-center"
+            >
+              <FacebookIcon className="w-5 h-5" />
+            </a>
           </div>
         </div>
 
@@ -177,62 +191,62 @@ export default function Contact() {
             <EditableText
               as="p"
               contentKey="contact.return.p1"
-              defaultValue="„A visszaküldéssel és reklamációval kapcsolatos ügyintézés kizárólag írásban, e-mailben történik.”"
+              defaultValue="A visszaküldéssel és reklamációval kapcsolatos ügyintézés kizárólag írásban, e-mailben történik."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h1" defaultValue="„Elállási jog”" />
+              <EditableText as="span" contentKey="contact.return.h1" defaultValue="Elállási jog" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p2"
-              defaultValue="„A fogyasztót a termék kézhezvételétől számított 14 naptári napon belül indokolás nélküli elállási jog illeti meg. Több termék egyidejű rendelése esetén az elállási jog a rendelés egyes termékeire külön-külön is gyakorolható. Az elállási jog gyakorlásához a vásárlónak egyértelmű nyilatkozatot kell tennie az alábbi elérhetőségen: E-mail cím: hello@candlie.hu A vásárló az elállási jogát a jelen tájékoztató végén található elállási nyilatkozat-minta felhasználásával is gyakorolhatja.”"
+              defaultValue="A fogyasztót a termék kézhezvételétől számított 14 naptári napon belül indokolás nélküli elállási jog illeti meg. Több termék egyidejű rendelése esetén az elállási jog a rendelés egyes termékeire külön-külön is gyakorolható. Az elállási jog gyakorlásához a vásárlónak egyértelmű nyilatkozatot kell tennie az alábbi elérhetőségen: E-mail cím: hello@candlie.hu A vásárló az elállási jogát a jelen tájékoztató végén található elállási nyilatkozat-minta felhasználásával is gyakorolhatja."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h2" defaultValue="„Termék visszaküldés”" />
+              <EditableText as="span" contentKey="contact.return.h2" defaultValue="Termék visszaküldés" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p3"
-              defaultValue="„Elállás esetén a vásárló köteles a terméket haladéktalanul, de legkésőbb az elállás közlésétől számított 14 napon belül visszaküldeni. A visszaküldés közvetlen költsége a vásárlót terheli. A terméket nem használt, sértetlen állapotban, lehetőség szerint az eredeti csomagolásban kérjük visszaküldeni. A szolgáltató fenntartja a jogot, hogy visszaélésszerű elállás vagy ismétlődő indokolatlan visszaküldés esetén a további rendelések teljesítését megtagadja.”"
+              defaultValue="Elállás esetén a vásárló köteles a terméket haladéktalanul, de legkésőbb az elállás közlésétől számított 14 napon belül visszaküldeni. A visszaküldés közvetlen költsége a vásárlót terheli. A terméket nem használt, sértetlen állapotban, lehetőség szerint az eredeti csomagolásban kérjük visszaküldeni. A szolgáltató fenntartja a jogot, hogy visszaélésszerű elállás vagy ismétlődő indokolatlan visszaküldés esetén a további rendelések teljesítését megtagadja."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h3" defaultValue="„Át nem vett csomag”" />
+              <EditableText as="span" contentKey="contact.return.h3" defaultValue="Át nem vett csomag" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p4"
-              defaultValue="„Amennyiben a vásárló a megrendelt csomagot nem veszi át, és az a szolgáltatóhoz visszaérkezik, az nem minősül az elállási jog gyakorlásának. Ebben az esetben a szolgáltató jogosult a felmerült szállítási és kezelési költségeket a visszatérítendő összegből levonni, vagy – utánvétes rendelés esetén – a vásárlóval szemben érvényesíteni. A vásárló a csomag újbóli kiküldését kizárólag a szállítási költségek előzetes megfizetését követően kérheti.”"
+              defaultValue="Amennyiben a vásárló a megrendelt csomagot nem veszi át, és az a szolgáltatóhoz visszaérkezik, az nem minősül az elállási jog gyakorlásának. Ebben az esetben a szolgáltató jogosult a felmerült szállítási és kezelési költségeket a visszatérítendő összegből levonni, vagy - utánvétes rendelés esetén - a vásárlóval szemben érvényesíteni. A vásárló a csomag újbóli kiküldését kizárólag a szállítási költségek előzetes megfizetését követően kérheti."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h4" defaultValue="„Visszatérítés”" />
+              <EditableText as="span" contentKey="contact.return.h4" defaultValue="Visszatérítés" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p5"
-              defaultValue="„Az elállás elfogadását követően a szolgáltató a visszaküldött termék beérkezésétől számított, de legkésőbb az elállásról való tudomásszerzéstől számított 14 napon belül visszatéríti a termék vételárát. A visszatérítés az eredeti fizetési móddal megegyező módon történik, kivéve, ha a felek ettől eltérően állapodnak meg. Utánvétes fizetés esetén a visszatérítés banki átutalással történik, a vásárló által megadott bankszámlaszámra. Elállás esetén a szolgáltató a vásárló által megfizetett szállítási díjat legfeljebb a legolcsóbb szállítási mód díjáig téríti vissza; mivel ez a személyes átvétel, amely díjmentes, szállítási díj visszatérítésére nem kerül sor. A szolgáltató jogosult a visszatérítést addig visszatartani, amíg a termék vissza nem érkezik.”"
+              defaultValue="Az elállás elfogadását követően a szolgáltató a visszaküldött termék beérkezésétől számított, de legkésőbb az elállásról való tudomásszerzéstől számított 14 napon belül visszatéríti a termék vételárát. A visszatérítés az eredeti fizetési móddal megegyező módon történik, kivéve, ha a felek ettől eltérően állapodnak meg. Utánvétes fizetés esetén a visszatérítés banki átutalással történik, a vásárló által megadott bankszámlaszámra. Elállás esetén a szolgáltató a vásárló által megfizetett szállítási díjat legfeljebb a legolcsóbb szállítási mód díjáig téríti vissza; mivel ez a személyes átvétel, amely díjmentes, szállítási díj visszatérítésére nem kerül sor. A szolgáltató jogosult a visszatérítést addig visszatartani, amíg a termék vissza nem érkezik."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h5" defaultValue="„Elállási jog alóli kivételek”" />
+              <EditableText as="span" contentKey="contact.return.h5" defaultValue="Elállási jog alóli kivételek" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p6"
-              defaultValue="„A kézzel készült termékek jellegéből adódóan az egyes darabok között kisebb szín-, forma- vagy díszítésbeli eltérések előfordulhatnak, amelyek nem minősülnek hibának. Az illatérzet szubjektív, ezért az illat intenzitása vagy jellege miatti eltérés nem minősül hibás teljesítésnek. Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés – úgynevezett frosting – jelenik meg, ami a 100% szójaviaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja. Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának. A fogyasztót nem illeti meg az elállási jog olyan termékek esetében, amelyek a vásárló egyedi kérésére, személyre szabottan készültek (például egyedi felirat, név, dátum, külön kért szín- vagy illatkombináció). A vásárló által hibásan megadott szállítási adatokból eredő késedelemért vagy sikertelen kézbesítésért a szolgáltató nem vállal felelősséget.”"
+              defaultValue="A kézzel készült termékek jellegéből adódóan az egyes darabok között kisebb szín-, forma- vagy díszítésbeli eltérések előfordulhatnak, amelyek nem minősülnek hibának. Az illatérzet szubjektív, ezért az illat intenzitása vagy jellege miatti eltérés nem minősül hibás teljesítésnek. Jelentős hőváltozás esetén előfordul, hogy a gyertya falán jegesedés - úgynevezett frosting - jelenik meg, ami a 100% szójaviaszból készült gyertyák esetén gyakori, a gyertya minőségét igazolja. Az égést és a gyertya illatát nem befolyásolja, nem tekinthető hibának. A fogyasztót nem illeti meg az elállási jog olyan termékek esetében, amelyek a vásárló egyedi kérésére, személyre szabottan készültek (például egyedi felirat, név, dátum, külön kért szín- vagy illatkombináció). A vásárló által hibásan megadott szállítási adatokból eredő késedelemért vagy sikertelen kézbesítésért a szolgáltató nem vállal felelősséget."
             />
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h7" defaultValue="„Sérült termék esetén”" />
+              <EditableText as="span" contentKey="contact.return.h7" defaultValue="Sérült termék esetén" />
             </h3>
             <div>
               <EditableText
                 as="p"
                 contentKey="contact.return.p7"
-                defaultValue="„Amennyiben a vásárló a csomag átvételekor vagy kibontásakor sérült terméket észlel (például törött, repedt gyertya), kérjük, haladéktalanul, de legkésőbb 48 órán belül jelezze azt e-mailben az alábbi elérhetőségen: E-mail: hello@candlie.hu A bejelentéshez kérjük csatolni:"
+                defaultValue="Amennyiben a vásárló a csomag átvételekor vagy kibontásakor sérült terméket észlel (például törött, repedt gyertya), kérjük, haladéktalanul, de legkésőbb 48 órán belül jelezze azt e-mailben az alábbi elérhetőségen: E-mail: hello@candlie.hu A bejelentéshez kérjük csatolni:"
               />
               <ul className="list-disc pl-5">
                 <li>
@@ -245,17 +259,17 @@ export default function Contact() {
               <EditableText
                 as="p"
                 contentKey="contact.return.p8"
-                defaultValue="Szállítás közben megsérült termék esetén a visszaküldés költsége a szolgáltatót terheli, és a vásárló választása szerint: csereterméket küldünk, vagy a teljes vételárat visszatérítjük.”"
+                defaultValue="Szállítás közben megsérült termék esetén a visszaküldés költsége a szolgáltatót terheli, és a vásárló választása szerint: csereterméket küldünk, vagy a teljes vételárat visszatérítjük."
               />
             </div>
 
             <h3 className="text-base font-semibold" style={{ color: 'rgb(115, 85, 115)' }}>
-              <EditableText as="span" contentKey="contact.return.h6" defaultValue="„Elállási nyilatkozat-minta”" />
+              <EditableText as="span" contentKey="contact.return.h6" defaultValue="Elállási nyilatkozat-minta" />
             </h3>
             <EditableText
               as="p"
               contentKey="contact.return.p9"
-              defaultValue="„Alulírott ……………………………………… kijelentem, hogy elállok a ……………………………………… termék(ek) adásvételére irányuló szerződéstől. Rendelés száma: ……………………Átvétel dátuma: …………………… Név: ………………………………………Cím: ………………………………………Dátum: …………………… Aláírás (papíron történő nyilatkozat esetén)”"
+              defaultValue="Alulírott ……………………………………… kijelentem, hogy elállok a ……………………………………… termék(ek) adásvételére irányuló szerződéstől. Rendelés száma: ……………………Átvétel dátuma: …………………… Név: ………………………………………Cím: ………………………………………Dátum: …………………… Aláírás (papíron történő nyilatkozat esetén)"
             />
           </div>
         </DialogContent>

@@ -830,7 +830,7 @@ export default function Checkout() {
               </div>
 
               <div className="text-xs text-black/50">
-                * Az árak forintban értendők, tartalmazzák a <span className="text-black/70">27%-os</span> áfát.
+                * Az árak forintban értendők.
               </div>
             </div>
           </motion.div>

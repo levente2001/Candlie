@@ -24,6 +24,9 @@ function normalizeCode(value) {
 }
 
 export default function Checkout() {
+  const COD_FEE = 600;
+  const COD_LABEL_FEE = 600;
+
   const [params] = useSearchParams();
   const canceled = params.get('canceled') === '1';
 
@@ -34,6 +37,7 @@ export default function Checkout() {
   // 'stripe' | 'cod'
   const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [careAccepted, setCareAccepted] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [showCareModal, setShowCareModal] = useState(false);
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [couponCode, setCouponCode] = useState('');
@@ -149,7 +153,8 @@ export default function Checkout() {
   };
 
   const discountAmount = computeDiscount(appliedCoupon, subtotal);
-  const total = Math.max(0, subtotal - discountAmount + shippingAmount);
+  const codFee = paymentMethod === 'cod' ? COD_FEE : 0;
+  const total = Math.max(0, subtotal - discountAmount + shippingAmount + codFee);
 
   const applyCoupon = () => {
     setCouponError('');
@@ -200,6 +205,7 @@ export default function Checkout() {
     if (cart.length === 0) return setError('A kosarad üres.');
     if (activeShipping.length > 0 && !selectedShipping) return setError('Válassz szállítási módot.');
     if (!careAccepted) return setError('A továbbhaladáshoz el kell fogadnod a CANDLIE Care útmutatót.');
+    if (!legalAccepted) return setError('A továbbhaladáshoz el kell fogadnod az ÁSZF és Adatkezelési tájékoztatót.');
 
     setIsSubmitting(true);
 
@@ -238,6 +244,7 @@ export default function Checkout() {
         })),
 
         subtotal_amount: subtotal,
+        payment_fee: codFee,
         shipping: selectedShipping
           ? {
               id: selectedShipping.id,
@@ -692,7 +699,7 @@ export default function Checkout() {
                     </div>
                     <div>
                       <div className="font-semibold">Utánvét</div>
-                      <div className="text-xs text-black/60">Fizetés átvételkor</div>
+                      <div className="text-xs text-black/60">Fizetés átvételkor, +{COD_LABEL_FEE} Ft</div>
                     </div>
                   </div>
                 </button>
@@ -747,32 +754,55 @@ export default function Checkout() {
             </div>
 
             <div className="bg-white rounded-2xl p-6 border border-black/10">
-              <div className="flex items-start gap-3">
-                <input
-                  id="careAccept"
-                  type="checkbox"
-                  checked={careAccepted}
-                  onChange={(e) => setCareAccepted(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
-                />
-                <label htmlFor="careAccept" className="text-sm text-black/70">
-                  Elolvastam és elfogadom a{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowCareModal(true)}
-                    className="text-[var(--candlie-pink-primary)] underline underline-offset-2"
-                  >
-                    CANDLIE Care – Gyertyakezelés és biztonsági útmutatót
-                  </button>
-                  .
-                </label>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <input
+                    id="careAccept"
+                    type="checkbox"
+                    checked={careAccepted}
+                    onChange={(e) => setCareAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
+                  />
+                  <label htmlFor="careAccept" className="text-sm text-black/70">
+                    Elolvastam és elfogadom a{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowCareModal(true)}
+                      className="text-[var(--candlie-pink-primary)] underline underline-offset-2"
+                    >
+                      CANDLIE Care – Gyertyakezelés és biztonsági útmutatót
+                    </button>
+                    .
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <input
+                    id="legalAccept"
+                    type="checkbox"
+                    checked={legalAccepted}
+                    onChange={(e) => setLegalAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
+                  />
+                  <label htmlFor="legalAccept" className="text-sm text-black/70">
+                    Elolvastam és elfogadom az{' '}
+                    <Link to={createPageUrl('Aszf')} target="_blank" rel="noreferrer" className="text-[var(--candlie-pink-primary)] underline underline-offset-2">
+                      ÁSZF
+                    </Link>{' '}
+                    és{' '}
+                    <Link to={createPageUrl('Privacy')} target="_blank" rel="noreferrer" className="text-[var(--candlie-pink-primary)] underline underline-offset-2">
+                      Adatkezelési tájékoztatót
+                    </Link>
+                    .
+                  </label>
+                </div>
               </div>
             </div>
 
             {/* CTA */}
             <Button
               type="submit"
-              disabled={isSubmitting || !careAccepted}
+              disabled={isSubmitting || !careAccepted || !legalAccepted}
               className="w-full h-14 bg-[var(--candlie-pink-secondary)] text-white font-semibold text-lg rounded-xl hover:shadow-lg hover:shadow-[var(--candlie-pink-primary)]/25 transition-all"
             >
               {isSubmitting ? (
@@ -820,6 +850,13 @@ export default function Checkout() {
                   <span>Szállítás</span>
                   <span>{shippingAmount === 0 ? 'Ingyenes' : `${shippingAmount.toLocaleString('hu-HU')} Ft`}</span>
                 </div>
+
+                {codFee > 0 && (
+                  <div className="flex justify-between text-black/60">
+                    <span>Utánvét felár</span>
+                    <span>{codFee.toLocaleString('hu-HU')} Ft</span>
+                  </div>
+                )}
 
                 <div className="border-t border-black/10 pt-4">
                   <div className="flex justify-between text-lg font-semibold">

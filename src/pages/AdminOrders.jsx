@@ -202,7 +202,7 @@ export default function AdminOrders() {
           {selectedOrder && (
             <div className="space-y-6">
               {/* Customer Info */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-black/5 rounded-xl p-4">
                   <h4 className="text-sm text-black/60 mb-2">Vásárló</h4>
                   <p className="font-medium">{selectedOrder.customer_name}</p>
@@ -212,6 +212,10 @@ export default function AdminOrders() {
                 <div className="bg-black/5 rounded-xl p-4">
                   <h4 className="text-sm text-black/60 mb-2">Szállítási cím</h4>
                   <p className="text-sm">{selectedOrder.shipping_address}</p>
+                </div>
+                <div className="bg-black/5 rounded-xl p-4">
+                  <h4 className="text-sm text-black/60 mb-2">Számlázási cím</h4>
+                  <p className="text-sm">{selectedOrder.billing_address || 'Nincs megadva'}</p>
                 </div>
               </div>
 

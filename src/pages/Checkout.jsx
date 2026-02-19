@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -21,6 +21,48 @@ function calcShippingAmount(method, subtotal) {
 
 function normalizeCode(value) {
   return String(value || '').trim().toUpperCase();
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function getParcelLockerProvider(methodName) {
+  const normalized = normalizeText(methodName);
+  if (!normalized.includes('csomagautomata')) return null;
+  if (normalized.includes('gls')) return 'gls';
+  if (normalized.includes('mpl')) return 'mpl';
+  if (normalized.includes('foxpost')) return 'foxpost';
+  return null;
+}
+
+function getParcelLockerMapUrl(provider) {
+  if (provider === 'mpl') return 'https://www.posta.hu/szolgaltatasok/szolgaltataskereso';
+  if (provider === 'foxpost') return 'https://cdn.foxpost.hu/apt-finder/v1/app/';
+  return '';
+}
+
+function getParcelLockerExternalUrl(provider) {
+  if (provider === 'gls') return 'https://gls-group.com/HU/hu/csomagpont-kereses/';
+  if (provider === 'mpl') return 'https://www.posta.hu/szolgaltatasok/szolgaltataskereso';
+  if (provider === 'foxpost') return 'https://foxpost.hu/csomagautomata-kereso';
+  return '';
+}
+
+function formatPickupPointLabel(point) {
+  if (!point || typeof point !== 'object') return '';
+  const id = point.id || point.code || point.parcelShopId || point.parcelShopCode || '';
+  const name = point.name || point.title || point.parcelShopName || point.aptName || '';
+  const zip = point.zipCode || point.zip || '';
+  const city = point.city || point.town || '';
+  const street = point.street || point.address || point.address1 || '';
+  const location = [zip, city, street].filter(Boolean).join(' ');
+  const primary = name || id;
+  if (!primary && !location) return '';
+  return [primary, location].filter(Boolean).join(' - ');
 }
 
 export default function Checkout() {
@@ -47,6 +89,8 @@ export default function Checkout() {
   // COD success UX
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState('');
+  const glsMapRef = useRef(null);
+  const [glsWidgetReady, setGlsWidgetReady] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -60,6 +104,7 @@ export default function Checkout() {
     shipping_city: '',
     shipping_street: '',
     shipping_house: '',
+    shipping_pickup_point: '',
     billing_zip: '',
     billing_city: '',
     billing_street: '',
@@ -70,7 +115,7 @@ export default function Checkout() {
   const updateField = (key, value) => {
     setFormData((prev) => {
       const next = { ...prev, [key]: value };
-      if (billingSameAsShipping && key.startsWith('shipping_')) {
+      if (billingSameAsShipping && key.startsWith('shipping_') && key !== 'shipping_pickup_point') {
         const suffix = key.replace('shipping_', '');
         next[`billing_${suffix}`] = value;
       }
@@ -136,6 +181,14 @@ export default function Checkout() {
   }, [activeShipping, shippingId]);
 
   const selectedShipping = activeShipping.find((m) => m.id === shippingId) || activeShipping[0] || null;
+  const isPersonalPickupShipping = useMemo(() => {
+    const normalized = normalizeText(selectedShipping?.name);
+    return normalized.includes('szemelyes atvetel');
+  }, [selectedShipping]);
+  const parcelLockerProvider = useMemo(() => getParcelLockerProvider(selectedShipping?.name), [selectedShipping]);
+  const isParcelLockerShipping = !!parcelLockerProvider;
+  const parcelLockerMapUrl = getParcelLockerMapUrl(parcelLockerProvider);
+  const parcelLockerExternalUrl = getParcelLockerExternalUrl(parcelLockerProvider);
 
   const shippingAmount = activeShipping.length
     ? calcShippingAmount(selectedShipping, subtotal)
@@ -198,12 +251,87 @@ export default function Checkout() {
     }
   }, [appliedCoupon, subtotal]);
 
+  useEffect(() => {
+    if (parcelLockerProvider !== 'gls') return;
+
+    if (window.customElements?.get('gls-dpm')) {
+      setGlsWidgetReady(true);
+      return;
+    }
+
+    const existingScript = document.getElementById('gls-dpm-script');
+    const handleReady = () => setGlsWidgetReady(true);
+
+    if (existingScript) {
+      existingScript.addEventListener('load', handleReady);
+      return () => existingScript.removeEventListener('load', handleReady);
+    }
+
+    const script = document.createElement('script');
+    script.id = 'gls-dpm-script';
+    script.src = 'https://map.gls-hungary.com/widget/gls-dpm.js';
+    script.type = 'module';
+    script.defer = true;
+    script.onload = handleReady;
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+    };
+  }, [parcelLockerProvider]);
+
+  useEffect(() => {
+    if (parcelLockerProvider !== 'gls') return;
+    const glsEl = glsMapRef.current;
+    if (!glsEl) return;
+
+    const handleChange = (event) => {
+      const label = formatPickupPointLabel(event?.detail || {});
+      if (label) updateField('shipping_pickup_point', label);
+    };
+
+    glsEl.addEventListener('change', handleChange);
+    return () => glsEl.removeEventListener('change', handleChange);
+  }, [parcelLockerProvider, glsWidgetReady]);
+
+  useEffect(() => {
+    if (parcelLockerProvider !== 'foxpost') return;
+
+    const handleMessage = (event) => {
+      if (event.origin !== 'https://cdn.foxpost.hu') return;
+
+      let payload = event.data;
+      if (typeof payload === 'string') {
+        try {
+          payload = JSON.parse(payload);
+        } catch {
+          return;
+        }
+      }
+      if (!payload || typeof payload !== 'object') return;
+
+      if (payload.type && payload.type !== 'select') return;
+
+      const label =
+        formatPickupPointLabel(payload.point || payload.selected || payload) ||
+        formatPickupPointLabel(payload.data || {});
+
+      if (label) updateField('shipping_pickup_point', label);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [parcelLockerProvider]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (cart.length === 0) return setError('A kosarad üres.');
     if (activeShipping.length > 0 && !selectedShipping) return setError('Válassz szállítási módot.');
+    if (isParcelLockerShipping && !formData.shipping_pickup_point.trim()) {
+      return setError('Csomagautomatás szállításnál add meg a kiválasztott automata címét vagy nevét.');
+    }
     if (!careAccepted) return setError('A továbbhaladáshoz el kell fogadnod a CANDLIE Care útmutatót.');
     if (!legalAccepted) return setError('A továbbhaladáshoz el kell fogadnod az ÁSZF és Adatkezelési tájékoztatót.');
 
@@ -212,10 +340,14 @@ export default function Checkout() {
     try {
       const isCOD = paymentMethod === 'cod';
 
-      const shippingAddress = formatAddress('shipping', formData);
+      const shippingAddress = isPersonalPickupShipping
+        ? 'Szemelyes atvetel'
+        : isParcelLockerShipping
+          ? formData.shipping_pickup_point.trim()
+          : formatAddress('shipping', formData);
       const residentialAddress = formatAddress('residential', formData);
       const billingAddress = billingSameAsShipping
-        ? shippingAddress
+        ? (isPersonalPickupShipping ? residentialAddress : shippingAddress)
         : formatAddress('billing', formData);
 
       const orderData = {
@@ -524,52 +656,122 @@ export default function Checkout() {
                 </div>
               )}
 
-              <div className="mt-6 grid md:grid-cols-4 gap-4">
-                <div>
-                  <Label htmlFor="shipping_zip" className="text-black/70">Szállítási irányítószám *</Label>
-                  <Input
-                    id="shipping_zip"
-                    required
-                    value={formData.shipping_zip}
-                    onChange={(e) => updateField('shipping_zip', e.target.value)}
-                    className="mt-2 h-12 rounded-xl"
-                    placeholder="1234"
-                  />
+              {isPersonalPickupShipping ? (
+                <div className="mt-6 rounded-xl border border-black/10 bg-black/5 p-4 text-sm text-black/70">
+                  
                 </div>
-                <div>
-                  <Label htmlFor="shipping_city" className="text-black/70">Szállítási város *</Label>
-                  <Input
-                    id="shipping_city"
-                    required
-                    value={formData.shipping_city}
-                    onChange={(e) => updateField('shipping_city', e.target.value)}
-                    className="mt-2 h-12 rounded-xl"
-                    placeholder="Budapest"
-                  />
+              ) : isParcelLockerShipping ? (
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-xl border border-black/10 bg-black/5 p-4 text-sm text-black/70">
+                    {parcelLockerProvider === 'mpl' ? (
+                      <div className="space-y-2">
+                        <p>
+                          MPL csomagautomata esetén a kereső új fülön nyílik meg.
+                        </p>
+                        <a
+                          href={parcelLockerExternalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block text-[var(--candlie-pink-primary)] underline underline-offset-2"
+                        >
+                          MPL térképkereső megnyitása
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="mt-3 space-y-2">
+                        <div className="h-[32rem] rounded-xl overflow-hidden border border-black/10 bg-white">
+                          {parcelLockerProvider === 'gls' ? (
+                            glsWidgetReady ? (
+                              <div className="w-full h-full">
+                                <gls-dpm ref={glsMapRef} country="hu" language="hu" id="gls-map" />
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-black/60">
+                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                GLS térkép betöltése...
+                              </div>
+                            )
+                          ) : (
+                            <iframe
+                              title="Foxpost csomagautomata térképkereső"
+                              src={parcelLockerMapUrl}
+                              className="w-full h-full"
+                              loading="lazy"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            />
+                          )}
+                        </div>
+                        <a
+                          href={parcelLockerExternalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block text-[var(--candlie-pink-primary)] underline underline-offset-2"
+                        >
+                          Ha a térkép nem látszik, nyisd meg új fülön
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="shipping_pickup_point" className="text-black/70">Kiválasztott automata *</Label>
+                    <Input
+                      id="shipping_pickup_point"
+                      required={isParcelLockerShipping}
+                      value={formData.shipping_pickup_point}
+                      onChange={(e) => updateField('shipping_pickup_point', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="Pl. FOXPOST - Allee, 1117 Budapest, Október 23. u. 8-10."
+                    />
+                  </div>
                 </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="shipping_street" className="text-black/70">Szállítási utca *</Label>
-                  <Input
-                    id="shipping_street"
-                    required
-                    value={formData.shipping_street}
-                    onChange={(e) => updateField('shipping_street', e.target.value)}
-                    className="mt-2 h-12 rounded-xl"
-                    placeholder="Példa utca"
-                  />
+              ) : (
+                <div className="mt-6 grid md:grid-cols-4 gap-4">
+                  <div>
+                    <Label htmlFor="shipping_zip" className="text-black/70">Szállítási irányítószám *</Label>
+                    <Input
+                      id="shipping_zip"
+                      required
+                      value={formData.shipping_zip}
+                      onChange={(e) => updateField('shipping_zip', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="1234"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="shipping_city" className="text-black/70">Szállítási város *</Label>
+                    <Input
+                      id="shipping_city"
+                      required
+                      value={formData.shipping_city}
+                      onChange={(e) => updateField('shipping_city', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="Budapest"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="shipping_street" className="text-black/70">Szállítási utca *</Label>
+                    <Input
+                      id="shipping_street"
+                      required
+                      value={formData.shipping_street}
+                      onChange={(e) => updateField('shipping_street', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="Példa utca"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="shipping_house" className="text-black/70">Szállítási házszám *</Label>
+                    <Input
+                      id="shipping_house"
+                      required
+                      value={formData.shipping_house}
+                      onChange={(e) => updateField('shipping_house', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="12"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="shipping_house" className="text-black/70">Szállítási házszám *</Label>
-                  <Input
-                    id="shipping_house"
-                    required
-                    value={formData.shipping_house}
-                    onChange={(e) => updateField('shipping_house', e.target.value)}
-                    className="mt-2 h-12 rounded-xl"
-                    placeholder="12"
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="mt-4">
                 <Label htmlFor="notes" className="text-black/70">Megjegyzés (opcionális)</Label>
@@ -599,7 +801,9 @@ export default function Checkout() {
                     }}
                     className="h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
                   />
-                  Számlázási cím megegyezik a szállítási címmel
+                  {isPersonalPickupShipping
+                    ? 'Számlázási cím megegyezik a lakcímmel'
+                    : 'Számlázási cím megegyezik a szállítási címmel'}
                 </label>
               </div>
 

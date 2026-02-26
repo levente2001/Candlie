@@ -803,7 +803,7 @@ export default function Checkout() {
                   />
                   {isPersonalPickupShipping
                     ? 'Számlázási cím megegyezik a lakcímmel'
-                    : 'Számlázási cím megegyezik a szállítási címmel'}
+                    : 'Számlázási cím megegyezik a lakcímmel'}
                 </label>
               </div>
 

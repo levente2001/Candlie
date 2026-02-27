@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { hu } from 'date-fns/locale';
+import { sendStatusUpdateEmail } from '@/lib/emailNotifications';
 
 const statusConfig = {
   pending: { label: 'Függőben', icon: Clock, color: 'bg-yellow-500/20 text-yellow-500' },
@@ -32,6 +33,7 @@ export default function AdminOrders() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -55,8 +57,26 @@ export default function AdminOrders() {
     return matchesSearch && matchesStatus;
   });
 
-  const updateStatus = (orderId, newStatus) => {
-    updateMutation.mutate({ id: orderId, data: { status: newStatus } });
+  const updateStatus = async (order, newStatus) => {
+    if (!order?.id) return;
+    if (order.status === newStatus) return;
+
+    setStatusMessage('');
+    try {
+      const updatedOrder = await updateMutation.mutateAsync({ id: order.id, data: { status: newStatus } });
+
+      try {
+        const mailResult = await sendStatusUpdateEmail(updatedOrder, newStatus);
+        if (mailResult?.ok) {
+          setStatusMessage('Státusz mentve és email kiküldve.');
+        }
+      } catch (mailErr) {
+        console.warn('Status email failed:', mailErr);
+        setStatusMessage('Státusz mentve, de az email küldése sikertelen.');
+      }
+    } catch (err) {
+      setStatusMessage(err?.message || 'A státusz mentése sikertelen.');
+    }
   };
 
   return (
@@ -94,6 +114,7 @@ export default function AdminOrders() {
               </SelectContent>
             </Select>
           </div>
+          {statusMessage && <p className="mb-4 text-sm text-black/70">{statusMessage}</p>}
 
           {/* Orders Table */}
           {isLoading ? (
@@ -168,7 +189,7 @@ export default function AdminOrders() {
                                 </Button>
                                 <Select
                                   value={order.status}
-                                  onValueChange={(value) => updateStatus(order.id, value)}
+                                  onValueChange={(value) => updateStatus(order, value)}
                                 >
                                   <SelectTrigger className="w-[140px] h-8 text-xs">
                                     <SelectValue />

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Loader2, CreditCard, AlertTriangle, Banknote } from 'lucide-react';
 
 import { base44 } from '@/api/base44Client';
+import { sendOrderConfirmationEmail } from '@/lib/emailNotifications';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -405,6 +406,13 @@ export default function Checkout() {
       };
 
       const created = await base44.entities.Order.create(orderData);
+
+      // Keep checkout flow resilient: email errors must not block ordering.
+      try {
+        await sendOrderConfirmationEmail(created);
+      } catch (mailErr) {
+        console.warn('Order confirmation email failed:', mailErr);
+      }
 
       // COD flow: no Stripe redirect
       if (isCOD) {

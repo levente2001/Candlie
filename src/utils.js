@@ -19,6 +19,7 @@ const pageMap = {
   AdminFeedbacks: '/admin/feedbacks',
   AdminLegal: '/admin/legal',
   AdminCoupons: '/admin/coupons',
+  AdminEmails: '/admin/emails',
 };
 
 export function createPageUrl(page) {

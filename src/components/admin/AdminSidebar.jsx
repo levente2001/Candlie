@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame, Tag, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Bitcoin, LogOut, ChevronLeft, Truck, Pencil, Flame, Tag, MessageSquare, Mail } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/api/firebase';
 import { motion } from 'framer-motion';
@@ -18,6 +18,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { icon: MessageSquare, label: 'Visszajelzések', page: 'AdminFeedbacks' },
     { icon: Settings, label: 'ÁSZF & Adatkezelés', page: 'AdminLegal' },
     { icon: Tag, label: 'Kuponok', page: 'AdminCoupons' },
+    { icon: Mail, label: 'Email automatizálás', page: 'AdminEmails' },
   ];
 
   const isActive = (page) => location.pathname.includes(page.toLowerCase().replace('admin', ''));

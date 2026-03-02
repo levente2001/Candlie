@@ -237,6 +237,13 @@ export default function AdminOrders() {
                 <div className="bg-black/5 rounded-xl p-4">
                   <h4 className="text-sm text-black/60 mb-2">Számlázási cím</h4>
                   <p className="text-sm">{selectedOrder.billing_address || 'Nincs megadva'}</p>
+                  {selectedOrder.billing_is_company && (
+                    <div className="mt-3 space-y-1 text-sm text-black/70">
+                      <p><span className="font-medium text-black">Cégnév:</span> {selectedOrder.billing_company_name || 'Nincs megadva'}</p>
+                      <p><span className="font-medium text-black">Cégjegyzékszám:</span> {selectedOrder.billing_company_registration_number || 'Nincs megadva'}</p>
+                      <p><span className="font-medium text-black">Adószám:</span> {selectedOrder.billing_tax_number || 'Nincs megadva'}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

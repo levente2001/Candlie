@@ -83,6 +83,7 @@ export default function Checkout() {
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [showCareModal, setShowCareModal] = useState(false);
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+  const [isCompanyBilling, setIsCompanyBilling] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
@@ -92,6 +93,11 @@ export default function Checkout() {
   const [placedOrderId, setPlacedOrderId] = useState('');
   const glsMapRef = useRef(null);
   const [glsWidgetReady, setGlsWidgetReady] = useState(false);
+
+  useEffect(() => {
+    if (!orderPlaced) return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [orderPlaced]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -110,6 +116,9 @@ export default function Checkout() {
     billing_city: '',
     billing_street: '',
     billing_house: '',
+    company_name: '',
+    company_registration_number: '',
+    tax_number: '',
     notes: '',
   });
 
@@ -333,6 +342,14 @@ export default function Checkout() {
     if (isParcelLockerShipping && !formData.shipping_pickup_point.trim()) {
       return setError('Csomagautomatás szállításnál add meg a kiválasztott automata címét vagy nevét.');
     }
+    if (
+      isCompanyBilling &&
+      (!formData.company_name.trim() ||
+        !formData.company_registration_number.trim() ||
+        !formData.tax_number.trim())
+    ) {
+      return setError('Céges számlázásnál add meg a cégnevet, a cégjegyzékszámot és az adószámot.');
+    }
     if (!careAccepted) return setError('A továbbhaladáshoz el kell fogadnod a CANDLIE Care útmutatót.');
     if (!legalAccepted) return setError('A továbbhaladáshoz el kell fogadnod az ÁSZF és Adatkezelési tájékoztatót.');
 
@@ -358,6 +375,10 @@ export default function Checkout() {
         shipping_address: shippingAddress,
         residential_address: residentialAddress,
         billing_address: billingAddress,
+        billing_is_company: isCompanyBilling,
+        billing_company_name: isCompanyBilling ? formData.company_name.trim() : '',
+        billing_company_registration_number: isCompanyBilling ? formData.company_registration_number.trim() : '',
+        billing_tax_number: isCompanyBilling ? formData.tax_number.trim() : '',
         notes: formData.notes,
         coupon_code: appliedCoupon?.code || '',
         coupon_name: appliedCoupon?.name || '',
@@ -416,7 +437,8 @@ export default function Checkout() {
 
       // COD flow: no Stripe redirect
       if (isCOD) {
-        localStorage.removeItem('cryptoCart');
+        localStorage.setItem('cryptoCart', JSON.stringify([]));
+        window.dispatchEvent(new Event('cartUpdated'));
         setCart([]);
         setPlacedOrderId(created.id);
         setOrderPlaced(true);
@@ -815,6 +837,18 @@ export default function Checkout() {
                 </label>
               </div>
 
+              <div className="mb-6">
+                <label className="flex items-center gap-2 text-sm text-black/70">
+                  <input
+                    type="checkbox"
+                    checked={isCompanyBilling}
+                    onChange={(e) => setIsCompanyBilling(e.target.checked)}
+                    className="h-4 w-4 rounded border-black/20 text-[var(--candlie-pink-primary)]"
+                  />
+                  Céges számlát kérek
+                </label>
+              </div>
+
               <div className="grid md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="billing_zip" className="text-black/70">Számlázási irányítószám *</Label>
@@ -865,6 +899,44 @@ export default function Checkout() {
                   />
                 </div>
               </div>
+
+              {isCompanyBilling && (
+                <div className="mt-6 grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="company_name" className="text-black/70">Cégnév *</Label>
+                    <Input
+                      id="company_name"
+                      required={isCompanyBilling}
+                      value={formData.company_name}
+                      onChange={(e) => updateField('company_name', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="Minta Kft."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="company_registration_number" className="text-black/70">Cégjegyzékszám *</Label>
+                    <Input
+                      id="company_registration_number"
+                      required={isCompanyBilling}
+                      value={formData.company_registration_number}
+                      onChange={(e) => updateField('company_registration_number', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="01-09-123456"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="tax_number" className="text-black/70">Adószám *</Label>
+                    <Input
+                      id="tax_number"
+                      required={isCompanyBilling}
+                      value={formData.tax_number}
+                      onChange={(e) => updateField('tax_number', e.target.value)}
+                      className="mt-2 h-12 rounded-xl"
+                      placeholder="12345678-1-42"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Fizetési mód */}

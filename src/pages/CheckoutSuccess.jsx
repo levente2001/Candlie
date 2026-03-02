@@ -13,6 +13,8 @@ export default function CheckoutSuccess() {
   const [state, setState] = useState({ loading: true, ok: false, error: "" });
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     (async () => {
       try {
         if (!orderId || !sessionId) {
